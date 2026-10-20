@@ -53,7 +53,7 @@ export function SeaBackground() {
 }
 
 /** 움직이는 물 표면(두 겹) — 시트 위 가장자리 등 */
-export function Surface({ color = '#f4fcff', back = 'rgba(255,255,255,.55)', className = '' }: { color?: string; back?: string; className?: string }) {
+export function Surface({ color = 'var(--sheet)', back = 'rgba(255,255,255,.55)', className = '' }: { color?: string; back?: string; className?: string }) {
   return (
     <div className={`pointer-events-none absolute inset-x-0 overflow-hidden ${className}`} aria-hidden>
       <svg className="wave-move absolute bottom-0 h-full w-[200%]" viewBox="0 0 800 40" preserveAspectRatio="none">
@@ -174,7 +174,7 @@ export function Header({ seg, onBack }: { seg: number; onBack?: () => void }) {
         <span className="w-2" />
       )}
       <Droplet size={17} />
-      <span className="whitespace-nowrap text-[13px] font-bold text-sea">
+      <span className="whitespace-nowrap text-[clamp(13.5px,3.85vw,16px)] font-bold text-sea">
         <span className="max-[359px]:hidden">에코업 </span>수처리 전시관
       </span>
       <span className="ml-auto">
@@ -208,7 +208,7 @@ export function Hero({ eyebrow, title, lead, center = false, compact = false }: 
         <motion.span
           initial={{ opacity: 0, y: -6 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12.5px] font-bold tracking-tight text-sea"
+          className="glass inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[clamp(13px,3.72vw,15.5px)] font-bold tracking-tight text-sea"
         >
           <svg width="11" height="13" viewBox="0 0 50 60" aria-hidden>
             <path d="M25 2C25 2 4 27 4 39a21 21 0 0 0 42 0C46 27 25 2 25 2z" fill="#00add0" />
@@ -218,7 +218,7 @@ export function Hero({ eyebrow, title, lead, center = false, compact = false }: 
       )}
       <Title lines={title} className={compact ? 'mt-[min(10px,1.2vh)]' : 'mt-3'} size={compact ? 'min(8.4vw, 4.4vh, 36px)' : undefined} />
       {lead && (
-        <p className={`b-accent text-sea/85 ${compact ? 'mt-[min(10px,1.2vh)] text-[clamp(13px,1.85vh,15px)] leading-[1.5]' : 'mt-3 text-[15px] leading-[1.6]'}`}>
+        <p className={`b-accent text-sea/85 ${compact ? 'mt-[min(10px,1.2vh)] text-[clamp(15.5px,4.36vw,18px)] leading-[1.5]' : 'mt-3 text-[clamp(15.5px,4.36vw,18px)] leading-[1.6]'}`}>
           <Rich text={lead} />
         </p>
       )}
@@ -257,18 +257,18 @@ export function Sheet({ children }: { children: ReactNode }) {
 
 // 예전 이름 호환
 export function Eyebrow({ children }: { children: ReactNode }) {
-  return <p className="mt-3 text-[13px] font-bold tracking-wide text-sea">{children}</p>
+  return <p className="mt-3 text-[clamp(13.5px,3.85vw,16px)] font-bold tracking-wide text-sea">{children}</p>
 }
 export function Lead({ text }: { text: string }) {
   return (
-    <p className="b-accent mt-3 text-[15px] leading-[1.6] text-mute">
+    <p className="b-accent mt-3 text-[clamp(15.5px,4.36vw,18px)] leading-[1.6] text-mute">
       <Rich text={text} />
     </p>
   )
 }
 
 export function Chip({ children }: { children: ReactNode }) {
-  return <span className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-[13.5px] font-bold text-sea shadow-[0_3px_8px_rgba(8,60,100,0.12)]">{children}</span>
+  return <span className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-[clamp(14px,3.97vw,16.5px)] font-bold text-sea shadow-[0_3px_8px_rgba(8,60,100,0.12)]">{children}</span>
 }
 
 /** 아래 고정 버튼 띠 (시트 색으로 페이드) */
@@ -280,7 +280,7 @@ export function BottomBar({ children, tone = 'sheet', fit = false }: { children:
           ? 'z-10 -mx-5 mt-auto shrink-0 px-5 pt-[min(14px,1.8vh)] pb-[max(min(24px,3vh),calc(env(safe-area-inset-bottom)+10px))]'
           : 'sticky bottom-0 z-10 -mx-5 mt-auto px-5 pt-6 pb-[max(18px,env(safe-area-inset-bottom))]'
       }
-      style={tone === 'sheet' ? { background: 'linear-gradient(180deg, rgba(244,252,255,0), #f4fcff 40%)' } : undefined}
+      style={tone === 'sheet' ? { background: 'linear-gradient(180deg, transparent, var(--sheet) 40%)' } : undefined}
     >
       {children}
     </div>
@@ -309,7 +309,7 @@ export function Button({
         ? 'border-[2.5px] border-sea bg-white text-sea shadow-[0_4px_0_rgba(11,74,117,0.25)]'
         : 'bg-transparent text-sea/80'
   return (
-    <button onClick={onClick} disabled={disabled} className={`flex h-[58px] w-full items-center justify-center gap-2 rounded-2xl text-[18px] font-bold ${style} ${className}`}>
+    <button onClick={onClick} disabled={disabled} className={`flex h-[58px] w-full items-center justify-center gap-2 rounded-2xl text-[clamp(18.5px,5.13vw,21px)] font-bold ${style} ${className}`}>
       {children}
     </button>
   )
@@ -321,7 +321,7 @@ export function ImageSlot({ src, label, className = '', children }: { src?: stri
   return (
     <div className={`img-slot relative grid place-items-center overflow-hidden rounded-3xl text-center ${className}`} role="img" aria-label={label}>
       {children}
-      <span className="absolute top-2.5 left-2.5 rounded-full bg-white/85 px-2 py-0.5 text-[10.5px] font-bold text-sea/70">그림 자리</span>
+      <span className="absolute top-2.5 left-2.5 rounded-full bg-white/85 px-2 py-0.5 text-[clamp(11px,3.21vw,13.5px)] font-bold text-sea/70">그림 자리</span>
     </div>
   )
 }

@@ -25,22 +25,22 @@ export function MissionCard({ m, solved, state }: { m: Mission; solved: boolean;
   const { sel, pick, wrong } = state
   const showHint = wrong > 0 && !solved
   return (
-    <section className="mt-6 rounded-3xl border-2 border-dashed p-5" style={{ borderColor: 'var(--water)', background: 'color-mix(in srgb, var(--water) 9%, white)' }}>
+    <section className="mt-6 rounded-3xl border-2 border-dashed p-5" style={{ borderColor: 'var(--water)', background: 'color-mix(in srgb, var(--water) 10%, var(--card))' }}>
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-        <span className="whitespace-nowrap rounded-full px-2.5 py-1 text-[12px] font-extrabold tracking-wider text-white" style={{ background: 'var(--water)' }}>
+        <span className="whitespace-nowrap rounded-full px-2.5 py-1 text-[clamp(12.5px,3.59vw,15px)] font-extrabold tracking-wider text-white" style={{ background: 'var(--water)' }}>
           MISSION {m.no}
         </span>
         {solved ? (
-          <span className="flex items-center gap-1 text-[13px] font-extrabold text-eco">
+          <span className="flex items-center gap-1 text-[clamp(13.5px,3.85vw,16px)] font-extrabold text-eco">
             <Icon name="check" size={16} /> 해결
           </span>
         ) : (
-          <span className="flex items-center gap-1 text-[13px] font-semibold text-mute">
+          <span className="flex items-center gap-1 text-[clamp(13.5px,3.85vw,16px)] font-semibold text-mute">
             <Icon name="lock" size={15} /> 맞혀야 다음 섹션이 열려요
           </span>
         )}
       </div>
-      <p className="mt-3 text-[18px] font-extrabold leading-snug">{m.q}</p>
+      <p className="mt-3 text-[clamp(18.5px,5.13vw,21px)] font-extrabold leading-snug">{m.q}</p>
       <div key={wrong} className={`mt-4 flex flex-col gap-2.5 ${wrong > 0 && !solved ? 'shake' : ''}`}>
         {m.options.map((o, i) => {
           const on = sel === i
@@ -49,13 +49,13 @@ export function MissionCard({ m, solved, state }: { m: Mission; solved: boolean;
             <button
               key={o}
               onClick={() => pick(i)}
-              className={`flex min-h-[54px] items-center gap-3 rounded-2xl border-2 bg-white px-4 text-left text-[16px] transition-colors ${
+              className={`flex min-h-[54px] items-center gap-3 rounded-2xl border-2 bg-white px-4 text-left text-[clamp(16.5px,4.62vw,19px)] transition-colors ${
                 correct ? 'border-eco font-extrabold text-ink' : on ? 'border-deep font-extrabold text-ink' : 'border-line text-ink'
               }`}
               aria-pressed={on}
             >
               <span
-                className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-[14px] font-extrabold ${
+                className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-[clamp(14.5px,4.1vw,17px)] font-extrabold ${
                   correct ? 'bg-eco text-white' : on ? 'bg-deep text-white' : 'bg-[#eef3f5] text-mute'
                 }`}
               >
@@ -72,13 +72,13 @@ export function MissionCard({ m, solved, state }: { m: Mission; solved: boolean;
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mt-3 overflow-hidden rounded-xl bg-[#fff4e5] px-3.5 py-2.5 text-[14.5px] leading-relaxed text-[#8a4b00]"
+            className="mt-3 overflow-hidden rounded-xl bg-[#fff4e5] px-3.5 py-2.5 text-[clamp(15px,4.23vw,17.5px)] leading-relaxed text-[#8a4b00]"
           >
             <b>다시 생각해 볼까요?</b> {m.hint}
           </motion.p>
         )}
       </AnimatePresence>
-      {solved && <p className="mt-3 text-[14.5px] leading-relaxed text-mute">{m.done}</p>}
+      {solved && <p className="mt-3 text-[clamp(15px,4.23vw,17.5px)] leading-relaxed text-mute">{m.done}</p>}
     </section>
   )
 }
@@ -91,8 +91,7 @@ export function StampOverlay({ m, onNext, nextLabel }: { m: Mission; onNext: () 
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="fixed inset-0 z-50 overflow-y-auto"
-      style={{ background: 'linear-gradient(180deg, #d4f6ff 0%, #8fe2f7 55%, #4cc4ea 100%)' }}
+      className="overlay-sky fixed inset-0 z-50 overflow-y-auto"
       role="dialog"
       aria-modal
     >
@@ -103,7 +102,7 @@ export function StampOverlay({ m, onNext, nextLabel }: { m: Mission; onNext: () 
       </motion.div>
 
       <div className="relative mx-auto flex min-h-full max-w-[440px] flex-col items-center px-6 pt-[clamp(24px,7vh,64px)] pb-8 text-center">
-        <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', delay: 0.15 }} className="rounded-full bg-sea px-4 py-1.5 text-[13px] font-bold text-white">
+        <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', delay: 0.15 }} className="rounded-full bg-sea px-4 py-1.5 text-[clamp(13.5px,3.85vw,16px)] font-bold text-white">
           MISSION {m.no} 성공!
         </motion.span>
         <motion.h2
@@ -138,7 +137,7 @@ export function StampOverlay({ m, onNext, nextLabel }: { m: Mission; onNext: () 
                 initial={isNew ? { scale: 2.4, rotate: -30, opacity: 0 } : false}
                 animate={{ scale: 1, rotate: isNew ? -8 : 0, opacity: 1 }}
                 transition={{ delay: 1.35, type: 'spring', stiffness: 300, damping: 13 }}
-                className={`flex h-[72px] w-[72px] flex-col items-center justify-center rounded-full border-[3px] text-[12.5px] font-bold leading-tight ${
+                className={`flex h-[72px] w-[72px] flex-col items-center justify-center rounded-full border-[3px] text-[clamp(13px,3.72vw,15.5px)] font-bold leading-tight ${
                   got ? 'border-sea bg-lime text-sea shadow-[0_4px_0_#0b4a75]' : 'border-dashed border-white bg-white/30 text-sea/50'
                 }`}
               >
@@ -151,7 +150,7 @@ export function StampOverlay({ m, onNext, nextLabel }: { m: Mission; onNext: () 
             )
           })}
         </div>
-        <motion.p initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.6 }} className="relative mt-5 rounded-2xl bg-white/95 px-4 py-3 text-[15px] leading-relaxed text-ink shadow-[0_6px_18px_rgba(8,60,100,0.2)]">
+        <motion.p initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.6 }} className="relative mt-5 rounded-2xl bg-white/95 px-4 py-3 text-[clamp(15.5px,4.36vw,18px)] leading-relaxed text-ink shadow-[0_6px_18px_rgba(8,60,100,0.2)]">
           {m.done}
         </motion.p>
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.9 }} className="relative mt-auto w-full pt-6">

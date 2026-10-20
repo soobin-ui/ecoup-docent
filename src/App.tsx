@@ -25,7 +25,7 @@ const SEG: Record<Step, number> = {
 }
 
 /** 스크롤 없이 한 화면에 고정하는 단계 */
-const FIT = new Set<Step>(['about', 'talent', 'partners'])
+const FIT = new Set<Step>([])
 
 function useHash() {
   const [h, setH] = useState(location.hash)

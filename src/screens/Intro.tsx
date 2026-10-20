@@ -102,7 +102,7 @@ export function IntroScreen({ p, go, restart }: { p: Progress; go: (s: Step) => 
                 initial={{ opacity: 0, scale: 0.6, y: 6 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ delay: 1.3, type: 'spring', stiffness: 260, damping: 15 }}
-                className="absolute left-[52%] top-[37%] w-max rounded-2xl rounded-bl-sm bg-white px-3 py-1.5 text-[13.5px] font-bold text-sea shadow-[0_6px_16px_rgba(8,60,100,0.2)]"
+                className="absolute left-[52%] top-[37%] w-max rounded-2xl rounded-bl-sm bg-white px-3 py-1.5 text-[clamp(14px,3.97vw,16.5px)] font-bold text-sea shadow-[0_6px_16px_rgba(8,60,100,0.2)]"
               >
                 나 좀 맑게 해 줄래?
               </motion.div>
@@ -114,7 +114,7 @@ export function IntroScreen({ p, go, restart }: { p: Progress; go: (s: Step) => 
         <div className="relative shrink-0 px-5 pt-[min(36px,4.5vh)] pb-[max(min(84px,7.5vh),calc(env(safe-area-inset-bottom)+16px))]" style={{ background: 'linear-gradient(180deg,#36bdec 0%,#1592cf 40%,#0b5c90 100%)' }}>
           <Surface className="-top-[22px] h-[24px]" color="#36bdec" back="rgba(160,230,250,.75)" />
           <motion.div className="relative flex flex-col gap-2" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}>
-            <div className="mb-[min(12px,1.4vh)] flex justify-center gap-2 text-[clamp(12.5px,1.75vh,14px)] font-bold text-white">
+            <div className="mb-[min(12px,1.4vh)] flex justify-center gap-2 text-[clamp(14.5px,4.1vw,17px)] font-bold text-white">
               <span className="flex items-center gap-1 whitespace-nowrap rounded-full bg-white/20 px-3 py-1.5 ring-1 ring-white/45">
                 <Icon name="clock" size={15} /> {INTRO.chips[0]}
               </span>
@@ -130,7 +130,7 @@ export function IntroScreen({ p, go, restart }: { p: Progress; go: (s: Step) => 
                 <button onClick={() => go(resumeTo)} className="cta breathe h-[clamp(50px,7.6vh,64px)] w-full rounded-2xl text-[clamp(17px,2.5vh,20px)] font-bold">
                   {INTRO.resume}
                 </button>
-                <button onClick={restart} className="h-10 text-[14.5px] font-bold text-white/85">
+                <button onClick={restart} className="h-10 text-[clamp(15px,4.23vw,17.5px)] font-bold text-white/85">
                   {INTRO.restart}
                 </button>
               </>

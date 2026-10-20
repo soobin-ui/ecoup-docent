@@ -72,7 +72,7 @@ export function Section1Screen({ onNext }: { onNext: () => void }) {
             role="tab"
             aria-selected={tab === i}
             onClick={() => setTab(i)}
-            className={`h-12 rounded-2xl text-[15.5px] font-extrabold transition-colors ${tab === i ? 'bg-deep text-white' : 'bg-white text-mute'}`}
+            className={`h-12 rounded-2xl text-[clamp(16px,4.49vw,18.5px)] font-extrabold transition-colors ${tab === i ? 'bg-deep text-white' : 'bg-white text-mute'}`}
           >
             {x.name}
           </button>
@@ -85,19 +85,19 @@ export function Section1Screen({ onNext }: { onNext: () => void }) {
               <Jar color={t.color} specks={tab === 0 ? 3 : tab === 1 ? 5 : 6} />
               <div>
                 <p className="text-[24px] font-extrabold">{t.name}</p>
-                <p className="mt-0.5 text-[14.5px] text-mute">{t.sub}</p>
+                <p className="mt-0.5 text-[clamp(15px,4.23vw,17.5px)] text-mute">{t.sub}</p>
               </div>
             </div>
-            <p className="mt-4 text-[16px] leading-[1.65]">{t.body}</p>
-            <p className="mt-4 text-[14px] font-extrabold text-deep">{S1.hasLabel}</p>
+            <p className="mt-4 text-[clamp(16.5px,4.62vw,19px)] leading-[1.65]">{t.body}</p>
+            <p className="mt-4 text-[clamp(14.5px,4.1vw,17px)] font-extrabold text-deep">{S1.hasLabel}</p>
             <div className="mt-2 flex flex-wrap gap-2">
               {t.has.map((h) => (
-                <span key={h} className="rounded-full border border-line px-3 py-1.5 text-[14.5px]">
+                <span key={h} className="rounded-full border border-line px-3 py-1.5 text-[clamp(15px,4.23vw,17.5px)]">
                   {h}
                 </span>
               ))}
             </div>
-            <p className="mt-3 text-[13.5px] text-mute">예) {t.ex}</p>
+            <p className="mt-3 text-[clamp(14px,3.97vw,16.5px)] text-mute">예) {t.ex}</p>
           </motion.div>
         </AnimatePresence>
       </Card>
@@ -133,8 +133,8 @@ export function Section1MissionScreen({ solved, onSolve, onNext }: MissionProps)
           >
             <span className="h-5 w-5 shrink-0 rounded-full" style={{ background: it.color }} />
             <div>
-              <p className="text-[16.5px] font-extrabold">{it.name}</p>
-              <p className="mt-0.5 text-[14px] text-mute">
+              <p className="text-[clamp(17px,4.74vw,19.5px)] font-extrabold">{it.name}</p>
+              <p className="mt-0.5 text-[clamp(14.5px,4.1vw,17px)] text-mute">
                 {it.desc} · {it.ex}
               </p>
             </div>
@@ -195,10 +195,10 @@ export function Section2Screen({ solved, onSolve, onNext }: MissionProps) {
                   <Icon name={STEP_ICONS[i]} size={24} />
                 </span>
                 <div className="flex-1">
-                  <p className="text-[12.5px] font-extrabold text-mute">
+                  <p className="text-[clamp(13px,3.72vw,15.5px)] font-extrabold text-mute">
                     {i + 1}단계 · {s.tag}
                   </p>
-                  <p className="text-[17px] font-extrabold">{s.title}</p>
+                  <p className="text-[clamp(17.5px,4.87vw,20px)] font-extrabold">{s.title}</p>
                 </div>
                 <motion.span animate={{ rotate: on ? 180 : 0 }} className="text-mute">
                   <Icon name="chevron" size={20} />
@@ -210,7 +210,7 @@ export function Section2Screen({ solved, onSolve, onNext }: MissionProps) {
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden text-[15.5px] leading-[1.65]"
+                    className="overflow-hidden text-[clamp(16px,4.49vw,18.5px)] leading-[1.65]"
                   >
                     <span className="block pt-3">{s.body}</span>
                   </motion.p>
@@ -254,7 +254,7 @@ export function Section3Screen({ solved, onSolve, onNext }: MissionProps) {
                 <span className="grid h-14 w-14 place-items-center rounded-full bg-white/25">
                   <Icon name={t.id} size={30} />
                 </span>
-                <span className="text-[16px] font-extrabold drop-shadow">{t.name}</span>
+                <span className="text-[clamp(16.5px,4.62vw,19px)] font-extrabold drop-shadow">{t.name}</span>
               </span>
             </ImageSlot>
           </button>
@@ -284,7 +284,7 @@ export function Section3Screen({ solved, onSolve, onNext }: MissionProps) {
                 </span>
                 <p className="text-[21px] font-extrabold">{S3.tiles[pop].name}</p>
               </div>
-              <p className="mt-4 text-[16.5px] leading-[1.65]">{S3.tiles[pop].desc}</p>
+              <p className="mt-4 text-[clamp(17px,4.74vw,19.5px)] leading-[1.65]">{S3.tiles[pop].desc}</p>
               <Button className="mt-6" variant="outline" onClick={() => setPop(null)}>
                 닫기
               </Button>

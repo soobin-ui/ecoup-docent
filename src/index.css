@@ -523,3 +523,127 @@ button {
     display: none;
   }
 }
+
+/* ══ 다크 모드 — 휴대폰 설정(어두운 화면)을 따라 '밤바다' 톤으로 ══════════════ */
+:root {
+  --sheet: #f4fcff;
+  --card: #ffffff;
+}
+.overlay-sky {
+  background: linear-gradient(180deg, #d4f6ff 0%, #8fe2f7 55%, #4cc4ea 100%);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --sheet: #0c2232;
+    --card: #15354c;
+    --color-ink: #e9f5fb;
+    --color-mute: #a8c3d1;
+    --color-line: rgba(255, 255, 255, 0.13);
+    --color-foam: #12304a;
+  }
+  html {
+    color-scheme: dark;
+  }
+  body {
+    background: #0b2f47;
+  }
+  .sea-bg {
+    background:
+      radial-gradient(120% 55% at 50% -5%, rgba(80, 190, 230, 0.35) 0%, rgba(80, 190, 230, 0) 60%),
+      linear-gradient(180deg, #0d3a57 0%, #0b3552 40%, #0b4a6e 75%, #0c628d 100%);
+  }
+  .caustic {
+    opacity: 0.16;
+  }
+  .overlay-sky {
+    background: linear-gradient(180deg, #0f4565 0%, #0c3a57 55%, #0a3150 100%);
+  }
+  .sheet {
+    background: var(--sheet);
+  }
+  .glass {
+    background: rgba(12, 40, 60, 0.6);
+    border-color: rgba(255, 255, 255, 0.28);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  }
+  /* 흰 카드 → 어두운 카드 */
+  .bg-white,
+  .bg-white\/95,
+  .bg-white\/90,
+  .bg-white\/85 {
+    background-color: var(--card);
+  }
+  .bg-white\/70 {
+    background-color: rgba(21, 53, 76, 0.8);
+  }
+  /* 진한 바다색 글자 → 밝은 물색 글자 (배경이 밝은 연두 위는 그대로) */
+  .text-sea,
+  .text-sea\/85,
+  .text-sea\/80,
+  .text-sea\/70 {
+    color: #9fe6fb;
+  }
+  .text-sea\/60,
+  .text-sea\/50 {
+    color: rgba(159, 230, 251, 0.6);
+  }
+  .text-deep,
+  .b-accent b,
+  .b-accent strong {
+    color: #9fe6fb;
+  }
+  .bg-deep.text-white,
+  .bg-deep .text-white {
+    color: #fff;
+  }
+  .border-deep {
+    border-color: #5fcff0;
+  }
+  .bg-lime.text-sea,
+  .bg-lime .text-sea,
+  .keep-light .text-sea,
+  .keep-light .text-sea\/80 {
+    color: #0b4a75;
+  }
+  .border-sea {
+    border-color: #5fcff0;
+  }
+  /* 연한 바탕색들 */
+  .bg-\[\#e6f7ee\] {
+    background-color: rgba(15, 176, 74, 0.2);
+  }
+  .bg-\[\#e6f8fc\],
+  .bg-\[\#eaf6fa\],
+  .bg-\[\#e8f4f7\] {
+    background-color: rgba(0, 173, 208, 0.16);
+  }
+  .bg-\[\#d6eef6\] {
+    background-color: rgba(0, 173, 208, 0.32);
+  }
+  .bg-\[\#eef2f3\],
+  .bg-\[\#eef3f5\] {
+    background-color: rgba(255, 255, 255, 0.08);
+  }
+  .bg-\[\#fff4e5\] {
+    background-color: rgba(255, 170, 60, 0.16);
+  }
+  .text-\[\#8a4b00\],
+  .text-\[\#b45309\],
+  .text-\[\#9a5b00\] {
+    color: #ffc98a;
+  }
+  .text-\[\#c2410c\] {
+    color: #ff9e73;
+  }
+  .text-\[\#a9b6bb\],
+  .text-\[\#9fb0b7\],
+  .text-\[\#b6c3c8\] {
+    color: rgba(255, 255, 255, 0.35);
+  }
+  .bg-\[\#fde2d6\] {
+    background-color: rgba(255, 120, 80, 0.2);
+  }
+  .border-dashed.border-\[\#c5d2d7\] {
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+}

@@ -52,16 +52,16 @@ export function CompleteScreen({ onNext }: { onNext: () => void }) {
           {[0, 1, 2, 3].map((c) => (
             <span key={c} className="flex items-end gap-1.5">
               <Character level={c} size={c === 3 ? 46 : 36} />
-              {c < 3 && <span className="pb-2 text-[14px] font-bold text-sea/60">→</span>}
+              {c < 3 && <span className="pb-2 text-[clamp(14.5px,4.1vw,17px)] font-bold text-sea/60">→</span>}
             </span>
           ))}
         </div>
       </div>
       <Sheet>
-        <p className="text-center text-[15.5px] leading-[1.65] text-ink">{COMPLETE.lead}</p>
+        <p className="text-center text-[clamp(16px,4.49vw,18.5px)] leading-[1.65] text-ink">{COMPLETE.lead}</p>
         <div className="mt-5 flex justify-center gap-3">
           {STAMPS.map((s) => (
-            <div key={s} className="flex h-[72px] w-[72px] -rotate-6 flex-col items-center justify-center rounded-full border-[3px] border-sea bg-lime text-[12.5px] font-bold leading-tight text-sea shadow-[0_4px_0_#0b4a75]">
+            <div key={s} className="flex h-[72px] w-[72px] -rotate-6 flex-col items-center justify-center rounded-full border-[3px] border-sea bg-lime text-[clamp(13px,3.72vw,15.5px)] font-bold leading-tight text-sea shadow-[0_4px_0_#0b4a75]">
               {s.split(' ').map((w) => (
                 <span key={w} className="block">
                   {w}
@@ -105,7 +105,7 @@ export function HandsOnScreen({ p, update, onNext }: { p: Progress; update: Upd;
     <>
       <Hero eyebrow={HANDSON.eyebrow} title={HANDSON.title} lead={HANDSON.lead} />
       <Sheet>
-      {!live && <p className="text-[13px] font-bold text-[#b45309]">행사 기간(11/18~21) 회차표 미리보기 · {dayLabel(day)}</p>}
+      {!live && <p className="text-[clamp(13.5px,3.85vw,16px)] font-bold text-[#b45309]">행사 기간(11/18~21) 회차표 미리보기 · {dayLabel(day)}</p>}
 
       <div className="mt-3 flex flex-col gap-3">
         {HANDSON.programs.map((pr) => {
@@ -117,8 +117,8 @@ export function HandsOnScreen({ p, update, onNext }: { p: Progress; update: Upd;
                 <Icon name={pr.id === 'filter' ? 'filter' : 'energy'} size={44} className="text-white/90" />
               </ImageSlot>
               <p className="mt-3.5 text-[19px] font-extrabold">{pr.name}</p>
-              <p className="mt-1 text-[15px] leading-relaxed text-mute">{pr.desc}</p>
-              <div className="mt-2.5 flex gap-3 text-[13.5px] text-mute">
+              <p className="mt-1 text-[clamp(15.5px,4.36vw,18px)] leading-relaxed text-mute">{pr.desc}</p>
+              <div className="mt-2.5 flex gap-3 text-[clamp(14px,3.97vw,16.5px)] text-mute">
                 <span className="flex items-center gap-1">
                   <Icon name="people" size={16} /> 회차당 {pr.capacity}명
                 </span>
@@ -129,18 +129,18 @@ export function HandsOnScreen({ p, update, onNext }: { p: Progress; update: Upd;
 
               {mine && !picking ? (
                 <motion.div initial={{ scale: 0.96, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="mt-4 rounded-2xl border-2 border-dashed border-deep bg-[#eaf6fa] p-4">
-                  <p className="flex items-center gap-1.5 text-[13px] font-extrabold text-deep">
+                  <p className="flex items-center gap-1.5 text-[clamp(13.5px,3.85vw,16px)] font-extrabold text-deep">
                     <Icon name="ticket" size={17} /> {HANDSON.picked}
                   </p>
                   <p className="mt-1 text-[22px] font-extrabold">
                     {dayLabel(mine.day)} {mine.time}
                   </p>
-                  <p className="mt-1 text-[13px] text-mute">{HANDSON.ticketNote}</p>
+                  <p className="mt-1 text-[clamp(13.5px,3.85vw,16px)] text-mute">{HANDSON.ticketNote}</p>
                   <div className="mt-3 flex gap-2">
-                    <button onClick={() => setOpenPick(pr.id)} className="h-10 flex-1 rounded-xl bg-white text-[14px] font-semibold text-deep">
+                    <button onClick={() => setOpenPick(pr.id)} className="h-10 flex-1 rounded-xl bg-white text-[clamp(14.5px,4.1vw,17px)] font-semibold text-deep">
                       {HANDSON.change}
                     </button>
-                    <button onClick={() => choose(pr.id, null)} className="h-10 rounded-xl px-4 text-[14px] font-semibold text-mute">
+                    <button onClick={() => choose(pr.id, null)} className="h-10 rounded-xl px-4 text-[clamp(14.5px,4.1vw,17px)] font-semibold text-mute">
                       {HANDSON.cancel}
                     </button>
                   </div>
@@ -148,7 +148,7 @@ export function HandsOnScreen({ p, update, onNext }: { p: Progress; update: Upd;
               ) : (
                 <>
                   {!picking && (
-                    <Button variant="outline" className="mt-4 h-12 text-[16px]" onClick={() => setOpenPick(pr.id)}>
+                    <Button variant="outline" className="mt-4 h-12 text-[clamp(16.5px,4.62vw,19px)]" onClick={() => setOpenPick(pr.id)}>
                       <Icon name="clock" size={18} /> {HANDSON.pick}
                     </Button>
                   )}
@@ -165,17 +165,17 @@ export function HandsOnScreen({ p, update, onNext }: { p: Progress; update: Upd;
                                 key={t}
                                 disabled={off}
                                 onClick={() => choose(pr.id, t)}
-                                className={`flex h-12 flex-col items-center justify-center rounded-xl border text-[15px] font-extrabold ${
+                                className={`flex h-12 flex-col items-center justify-center rounded-xl border text-[clamp(15.5px,4.36vw,18px)] font-extrabold ${
                                   off ? 'border-transparent bg-[#eef2f3] text-[#a9b6bb]' : mine?.time === t ? 'border-deep bg-deep text-white' : 'border-line bg-white text-ink'
                                 }`}
                               >
                                 {t}
-                                {off && <span className="text-[10.5px] font-semibold">{isClosed ? HANDSON.closed : HANDSON.past}</span>}
+                                {off && <span className="text-[clamp(11px,3.21vw,13.5px)] font-semibold">{isClosed ? HANDSON.closed : HANDSON.past}</span>}
                               </button>
                             )
                           })}
                         </div>
-                        <button onClick={() => setOpenPick(null)} className="mt-2 h-10 w-full text-[14px] font-semibold text-mute">
+                        <button onClick={() => setOpenPick(null)} className="mt-2 h-10 w-full text-[clamp(14.5px,4.1vw,17px)] font-semibold text-mute">
                           닫기
                         </button>
                       </motion.div>
@@ -187,11 +187,11 @@ export function HandsOnScreen({ p, update, onNext }: { p: Progress; update: Upd;
           )
         })}
       </div>
-      <p className="mt-3 text-[13px] text-mute">{HANDSON.operator}</p>
+      <p className="mt-3 text-[clamp(13.5px,3.85vw,16px)] text-mute">{HANDSON.operator}</p>
 
       <BottomBar>
         <Button onClick={onNext}>{HANDSON.cta}</Button>
-        {Object.keys(p.bookings).length === 0 && <p className="mt-2 text-center text-[13px] text-mute">시간을 고르지 않아도 넘어갈 수 있어요</p>}
+        {Object.keys(p.bookings).length === 0 && <p className="mt-2 text-center text-[clamp(13.5px,3.85vw,16px)] text-mute">시간을 고르지 않아도 넘어갈 수 있어요</p>}
       </BottomBar>
       </Sheet>
     </>
@@ -240,7 +240,7 @@ export function SurveyScreen({ p, update, onDone }: { p: Progress; update: Upd; 
 
       {page === 0 && (
         <label className="mt-1 block">
-          <span className="text-[16px] font-extrabold">{SURVEY.nickname.label}</span>
+          <span className="text-[clamp(16.5px,4.62vw,19px)] font-extrabold">{SURVEY.nickname.label}</span>
           <input
             value={nick}
             onChange={(e) => setNick(e.target.value.slice(0, SURVEY.nickname.max))}
@@ -249,7 +249,7 @@ export function SurveyScreen({ p, update, onDone }: { p: Progress; update: Upd; 
             enterKeyHint="done"
             className="mt-2 h-14 w-full rounded-2xl border-2 border-line bg-white px-4 outline-none focus:border-deep"
           />
-          <span className="mt-1 block text-right text-[12px] text-mute">
+          <span className="mt-1 block text-right text-[clamp(12.5px,3.59vw,15px)] text-mute">
             {nick.length}/{SURVEY.nickname.max}
           </span>
         </label>
@@ -257,7 +257,7 @@ export function SurveyScreen({ p, update, onDone }: { p: Progress; update: Upd; 
 
       {qs.map((q) => (
         <div key={q.id} className="mt-5">
-          <p className="text-[16px] font-extrabold">{q.label}</p>
+          <p className="text-[clamp(16.5px,4.62vw,19px)] font-extrabold">{q.label}</p>
           <div className={`mt-2.5 ${'faces' in q && q.faces ? 'grid grid-cols-4 gap-2' : 'flex flex-wrap gap-2'}`}>
             {q.options.map((o, oi) => {
               const on = ans[q.id] === o
@@ -266,7 +266,7 @@ export function SurveyScreen({ p, update, onDone }: { p: Progress; update: Upd; 
                   <button
                     key={o}
                     onClick={() => setAns({ ...ans, [q.id]: o })}
-                    className={`flex flex-col items-center gap-1 rounded-2xl border-2 py-2.5 text-[12px] font-semibold leading-tight ${on ? 'border-deep bg-deep text-white' : 'border-line bg-white text-mute'}`}
+                    className={`flex flex-col items-center gap-1 rounded-2xl border-2 py-2.5 text-[clamp(12.5px,3.59vw,15px)] font-semibold leading-tight ${on ? 'border-deep bg-deep text-white' : 'border-line bg-white text-mute'}`}
                     aria-pressed={on}
                   >
                     <Face level={oi} />
@@ -277,7 +277,7 @@ export function SurveyScreen({ p, update, onDone }: { p: Progress; update: Upd; 
                 <button
                   key={o}
                   onClick={() => setAns({ ...ans, [q.id]: o })}
-                  className={`h-11 rounded-full border-2 px-4 text-[15px] font-semibold ${on ? 'border-deep bg-deep text-white' : 'border-line bg-white text-ink'}`}
+                  className={`h-11 rounded-full border-2 px-4 text-[clamp(15.5px,4.36vw,18px)] font-semibold ${on ? 'border-deep bg-deep text-white' : 'border-line bg-white text-ink'}`}
                   aria-pressed={on}
                 >
                   {o}
@@ -289,7 +289,7 @@ export function SurveyScreen({ p, update, onDone }: { p: Progress; update: Upd; 
       ))}
 
       <BottomBar>
-        {err && <p className="mb-2 text-center text-[14px] font-semibold text-[#c2410c]">{err}</p>}
+        {err && <p className="mb-2 text-center text-[clamp(14.5px,4.1vw,17px)] font-semibold text-[#c2410c]">{err}</p>}
         <Button onClick={next} disabled={busy}>
           {busy ? '보내는 중…' : page < SURVEY.pages.length - 1 ? SURVEY.next : SURVEY.submit}
         </Button>
@@ -371,7 +371,7 @@ export function ExchangeScreen({ p, update }: { p: Progress; update: Upd }) {
         {STAMPS.map((s, i) => (
           <div
             key={s}
-            className={`flex h-[78px] w-[78px] flex-col items-center justify-center rounded-full border-[3px] text-[13.5px] font-extrabold leading-tight ${
+            className={`flex h-[78px] w-[78px] flex-col items-center justify-center rounded-full border-[3px] text-[clamp(14px,3.97vw,16.5px)] font-extrabold leading-tight ${
               p.solved[i] ? 'border-sea bg-lime text-sea shadow-[0_4px_0_#0b4a75]' : 'border-dashed border-[#c5d2d7] text-[#9fb0b7]'
             }`}
           >
@@ -385,15 +385,15 @@ export function ExchangeScreen({ p, update }: { p: Progress; update: Upd }) {
       </div>
 
       <div className="relative mt-5 rounded-3xl border border-line bg-white p-5 text-center">
-        <p className="flex items-center justify-center gap-1.5 text-[13px] font-extrabold text-mute">
+        <p className="flex items-center justify-center gap-1.5 text-[clamp(13.5px,3.85vw,16px)] font-extrabold text-mute">
           <Icon name="gift" size={16} /> {EXCHANGE.giftLabel}
         </p>
-        <p className="mt-1 text-[17px] font-extrabold">{EXCHANGE.giftName}</p>
+        <p className="mt-1 text-[clamp(17.5px,4.87vw,20px)] font-extrabold">{EXCHANGE.giftName}</p>
         <div className="my-4 border-t border-dashed border-line" />
-        <p className="text-[15px] font-extrabold">{EXCHANGE.show}</p>
-        <p className="mt-1 text-[12.5px] font-semibold text-mute">{EXCHANGE.codeLabel}</p>
+        <p className="text-[clamp(15.5px,4.36vw,18px)] font-extrabold">{EXCHANGE.show}</p>
+        <p className="mt-1 text-[clamp(13px,3.72vw,15.5px)] font-semibold text-mute">{EXCHANGE.codeLabel}</p>
         <p className={`mt-1 font-mono text-[46px] font-extrabold tracking-[0.12em] ${p.exchanged ? 'text-[#b6c3c8] line-through decoration-4' : 'text-ink'}`}>{p.code ?? '----'}</p>
-        {p.offlineCode && <p className="mt-1 text-[13px] text-[#9a5b00]">{EXCHANGE.offline}</p>}
+        {p.offlineCode && <p className="mt-1 text-[clamp(13.5px,3.85vw,16px)] text-[#9a5b00]">{EXCHANGE.offline}</p>}
         <AnimatePresence>
           {p.exchanged && (
             <motion.div
@@ -407,15 +407,15 @@ export function ExchangeScreen({ p, update }: { p: Progress; update: Upd }) {
           )}
         </AnimatePresence>
       </div>
-      {p.exchanged && <p className="mt-3 text-center text-[14.5px] text-mute">{EXCHANGE.doneSub}</p>}
+      {p.exchanged && <p className="mt-3 text-center text-[clamp(15px,4.23vw,17.5px)] text-mute">{EXCHANGE.doneSub}</p>}
 
       {bookings.length > 0 && (
         <div className="mt-4 rounded-3xl border-2 border-dashed border-deep bg-[#eaf6fa] p-4">
-          <p className="flex items-center gap-1.5 text-[13px] font-extrabold text-deep">
+          <p className="flex items-center gap-1.5 text-[clamp(13.5px,3.85vw,16px)] font-extrabold text-deep">
             <Icon name="ticket" size={17} /> {EXCHANGE.ticket}
           </p>
           {bookings.map(([id, b]) => (
-            <p key={id} className="mt-1.5 flex justify-between text-[16px] font-extrabold">
+            <p key={id} className="mt-1.5 flex justify-between text-[clamp(16.5px,4.62vw,19px)] font-extrabold">
               <span>{HANDSON.programs.find((x) => x.id === id)?.name}</span>
               <span>
                 {dayLabel(b.day)} {b.time}
@@ -433,7 +433,7 @@ export function ExchangeScreen({ p, update }: { p: Progress; update: Upd }) {
             onPointerLeave={endHold}
             onPointerCancel={endHold}
             onContextMenu={(e) => e.preventDefault()}
-            className="relative h-14 w-full select-none overflow-hidden rounded-2xl border-2 border-deep bg-white text-[16px] font-extrabold text-deep"
+            className="relative h-14 w-full select-none overflow-hidden rounded-2xl border-2 border-deep bg-white text-[clamp(16.5px,4.62vw,19px)] font-extrabold text-deep"
           >
             <span className="absolute inset-y-0 left-0 bg-[#d6eef6]" style={{ width: holding ? '100%' : '0%', transition: holding ? 'width 0.9s linear' : 'none' }} />
             <span className="relative">{holding ? EXCHANGE.staffHold : EXCHANGE.staffBtn}</span>
@@ -447,7 +447,7 @@ export function ExchangeScreen({ p, update }: { p: Progress; update: Upd }) {
           <motion.div className="fixed inset-0 z-50 grid place-items-center bg-black/40 px-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="w-full max-w-[360px] rounded-3xl bg-white p-6">
               <p className="text-[20px] font-extrabold">{EXCHANGE.pinTitle}</p>
-              <p className="mt-1 text-[14.5px] text-mute">{EXCHANGE.pinLead}</p>
+              <p className="mt-1 text-[clamp(15px,4.23vw,17.5px)] text-mute">{EXCHANGE.pinLead}</p>
               <input
                 value={pin}
                 onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
@@ -457,7 +457,7 @@ export function ExchangeScreen({ p, update }: { p: Progress; update: Upd }) {
                 autoComplete="off"
                 className="mt-4 h-14 w-full rounded-2xl border-2 border-line text-center text-[24px] tracking-[0.5em] outline-none focus:border-deep"
               />
-              {msg && <p className="mt-2 text-[14px] font-semibold text-[#c2410c]">{msg}</p>}
+              {msg && <p className="mt-2 text-[clamp(14.5px,4.1vw,17px)] font-semibold text-[#c2410c]">{msg}</p>}
               <div className="mt-4 flex gap-2">
                 <button onClick={() => setPinOpen(false)} className="h-12 flex-1 rounded-2xl bg-[#eef2f3] font-extrabold text-mute">
                   취소

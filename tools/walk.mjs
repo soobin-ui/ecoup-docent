@@ -7,7 +7,8 @@ import path from 'node:path'
 const URL = process.argv[2] ?? 'http://localhost:5181/'
 const W = Number(process.argv[3] ?? 375)
 const H = Number(process.argv[4] ?? 812)
-const OUT = path.resolve('tools/shots', `${W}x${H}`)
+const DARK = process.env.DARK === '1'
+const OUT = path.resolve('tools/shots', `${W}x${H}${DARK ? '-dark' : ''}`)
 fs.rmSync(OUT, { recursive: true, force: true })
 fs.mkdirSync(OUT, { recursive: true })
 
@@ -18,6 +19,7 @@ const browser = await puppeteer.launch({
 })
 const page = await browser.newPage()
 await page.setViewport({ width: W, height: H, deviceScaleFactor: 2, isMobile: true, hasTouch: true })
+if (DARK) await page.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: 'dark' }])
 const errors = []
 page.on('pageerror', (e) => errors.push(String(e)))
 page.on('console', (m) => m.type() === 'error' && errors.push(m.text()))
