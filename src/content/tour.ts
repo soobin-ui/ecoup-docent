@@ -33,7 +33,7 @@ export const ABOUT = {
   eyebrow: 'ABOUT · 에코업 혁신융합대학사업단',
   title: ['환경을 ‘업(業)’으로', '키우는 사람들'],
   lead: '교육부·한국연구재단의 첨단분야 혁신융합대학사업이에요.',
-  whatQ: '에코업(Eco-Up)이 뭐예요?',
+  whatQ: '에코업이 뭐예요?',
   whatA: '환경시설·측정기기를 설계·제작·설치하거나 환경기술 서비스를 제공하는 **친환경 산업**이에요.',
   vision: '대한민국 에코업 성장을 주도할 글로벌 인재 양성',
   fieldsTitle: '에코업 6대 분야',
@@ -54,7 +54,7 @@ export const TALENT = {
   title: ['이런 인재를', '키워요'],
   badgeSub: '스마트 환경산업을 선도할',
   badge: 'Green Technology Innovator',
-  skillsTitle: '핵심역량 Eco-Metric',
+  skillsTitle: '핵심역량',
   skills: ['문제해결', '커뮤니케이션·협업', '도전정신', 'AI·Data 활용', '창의적 사고'],
   howTitle: '이렇게 배워요',
   how: [
