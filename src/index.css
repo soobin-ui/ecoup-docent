@@ -1,0 +1,525 @@
+@import 'tailwindcss';
+
+/*
+  폰트: 지마켓 산스 — KS X 1001 2350자 + 쓰는 기호 서브셋(CDN 없음, 전시장 데이터망 대비).
+*/
+@font-face {
+  font-family: 'Gmarket Sans';
+  src: url('./assets/fonts/GmarketSansMedium.subset.woff2') format('woff2');
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Gmarket Sans';
+  src: url('./assets/fonts/GmarketSansBold.subset.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}
+
+/*
+  ★ 색은 에코업 사업단 리플렛의 청록(#00ADD0)·초록(#0FB04A)에서 출발했습니다.
+     물 = 청록 계열 배경, 에코 = 연두·초록 강조, 글자·외곽선 = 깊은 바다색.
+*/
+@theme {
+  --font-sans:
+    'Gmarket Sans', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic',
+    system-ui, sans-serif;
+  --color-sea: #0b4a75; /* 깊은 바다 — 외곽선·제목·진한 글자 */
+  --color-sea-2: #0e6aa0;
+  --color-cyan: #00add0; /* 에코업 청록 */
+  --color-eco: #0fb04a; /* 에코업 초록 */
+  --color-lime: #c8f169; /* 제목 강조·하이라이트 */
+  --color-sun: #ffe15a;
+  --color-ink: #12324a; /* 흰 카드 안 본문 */
+  --color-mute: #5c7486;
+  --color-line: #d5e7ef;
+  --color-foam: #eefbff;
+  /* 예전 이름 호환 */
+  --color-deep: #0b4a75;
+}
+
+/* 물방울의 맑음(0~3) — 미션을 풀 때마다 body[data-clarity] 가 바뀌며 물방울·진행 관 색이 맑아집니다 */
+:root {
+  --water: #a68d5f;
+  --water-2: #c6ad7c;
+  --speck: 1;
+}
+body[data-clarity='1'] {
+  --water: #74a98a;
+  --water-2: #9fcbb0;
+  --speck: 0.65;
+}
+body[data-clarity='2'] {
+  --water: #20b6b4;
+  --water-2: #6fd8d2;
+  --speck: 0.3;
+}
+body[data-clarity='3'] {
+  --water: #08aee0;
+  --water-2: #74dcf6;
+  --speck: 0;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+  color-scheme: light;
+}
+body {
+  min-height: 100dvh;
+  background: #7fd8f2;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 16px;
+}
+button {
+  font-family: inherit;
+  touch-action: manipulation;
+}
+
+.b-accent b,
+.b-accent strong {
+  color: var(--color-sea);
+  font-weight: 700;
+}
+
+/* ── 물속 장면 배경(고정) ─────────────────────────────── */
+.sea-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 55% at 50% -5%, #f2fdff 0%, rgba(242, 253, 255, 0) 60%),
+    linear-gradient(180deg, #d4f6ff 0%, #9be6f8 34%, #5ccbec 70%, #2fb2e0 100%);
+}
+/* 물결 무늬 빛(코스틱) — 물속에서 일렁이는 빛 */
+.caustic {
+  position: absolute;
+  inset: -20%;
+  opacity: 0.35;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='3' stroke-linecap='round' opacity='.9'%3E%3Cpath d='M10 40c30-18 50 14 80-4s50-20 70 0 40 10 70-6'/%3E%3Cpath d='M-10 120c26-14 48 16 78 0s56-22 80-2 46 12 92-8'/%3E%3Cpath d='M20 200c28-16 52 12 82-2s46-18 72 2 34 8 66-6'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 240px 240px;
+  animation: caustic 18s linear infinite;
+}
+@keyframes caustic {
+  from {
+    transform: translate3d(0, 0, 0) rotate(-6deg);
+  }
+  to {
+    transform: translate3d(-240px, -120px, 0) rotate(-6deg);
+  }
+}
+/* 위로 떠오르는 큰 거품 — 몇 개만, 천천히 */
+.bubble {
+  position: absolute;
+  bottom: -60px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 30%, rgba(255, 255, 255, 0.95) 0 14%, rgba(255, 255, 255, 0.28) 15% 60%, rgba(255, 255, 255, 0.55) 61% 66%, rgba(255, 255, 255, 0) 67%);
+  animation: bubble-rise linear infinite;
+}
+@keyframes bubble-rise {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  50% {
+    transform: translate3d(14px, -55vh, 0);
+  }
+  90% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate3d(-8px, -115vh, 0);
+    opacity: 0;
+  }
+}
+
+/* 물결 띠 — 두 겹이 서로 다른 속도로 흐름 */
+.wave-move {
+  animation: wave-move 9s linear infinite;
+}
+.wave-move.slow {
+  animation-duration: 14s;
+}
+.wave-move.rev {
+  animation-direction: reverse;
+}
+@keyframes wave-move {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* ── 제목: 흰/연두 글자 + 깊은 바다색 외곽선 + 두꺼운 그림자 ── */
+.stroke-title {
+  paint-order: stroke fill;
+  -webkit-text-stroke-width: var(--stroke, 6px);
+  -webkit-text-stroke-color: var(--color-sea);
+  -webkit-text-stroke-color: #0b4a75;
+}
+.title-shadow {
+  filter: drop-shadow(0 4px 0 rgba(11, 74, 117, 0.45)) drop-shadow(0 12px 18px rgba(8, 60, 100, 0.25));
+}
+
+/* ── 누르는 버튼(연두 3D) ── */
+.cta {
+  background: linear-gradient(180deg, #d5f77e 0%, #9fe24f 55%, #7fd23e 100%);
+  color: #0b3c5e;
+  box-shadow:
+    0 6px 0 #4f9e25,
+    0 14px 26px rgba(8, 60, 100, 0.35),
+    inset 0 2px 0 rgba(255, 255, 255, 0.65);
+  transition:
+    transform 0.08s ease-out,
+    box-shadow 0.08s ease-out;
+}
+.cta:active:not(:disabled) {
+  transform: translateY(5px);
+  box-shadow:
+    0 1px 0 #4f9e25,
+    0 6px 12px rgba(8, 60, 100, 0.3),
+    inset 0 2px 0 rgba(255, 255, 255, 0.65);
+}
+.cta:disabled {
+  background: #cfdfe6;
+  color: #8aa1ad;
+  box-shadow: 0 4px 0 #b3c6cf;
+}
+.breathe {
+  animation: breathe 2.6s ease-in-out infinite;
+}
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+/* 유리 캡슐 — 물빛 위 머리표 */
+.glass {
+  background: rgba(255, 255, 255, 0.6);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 6px 16px rgba(8, 60, 100, 0.16), inset 0 1px 0 #fff;
+}
+/* 물이 담긴 캡슐 — 안에서 물결이 출렁 */
+.liquid {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.liquid::before,
+.liquid::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 200%;
+  z-index: -1;
+  background-repeat: repeat-x;
+  background-size: 50% 100%;
+}
+.liquid::before {
+  bottom: 0;
+  height: 62%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 40' preserveAspectRatio='none'%3E%3Cpath d='M0 10 Q25 0 50 10 T100 10 T150 10 T200 10 V40 H0z' fill='%2300add0' fill-opacity='.38'/%3E%3C/svg%3E");
+  animation: slosh 3.2s linear infinite;
+}
+.liquid::after {
+  bottom: 0;
+  height: 48%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 40' preserveAspectRatio='none'%3E%3Cpath d='M0 12 Q25 2 50 12 T100 12 T150 12 T200 12 V40 H0z' fill='%2300add0' fill-opacity='.45'/%3E%3C/svg%3E");
+  animation: slosh 2.3s linear infinite reverse;
+}
+@keyframes slosh {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* 버튼 위를 지나가는 물빛 */
+.cta {
+  position: relative;
+  overflow: hidden;
+}
+.cta::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -60%;
+  width: 45%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.7), transparent);
+  transform: skewX(-18deg);
+  animation: sheen 3.4s ease-in-out infinite;
+}
+@keyframes sheen {
+  0%,
+  55% {
+    left: -60%;
+  }
+  100% {
+    left: 130%;
+  }
+}
+
+/* 떨어지는 물줄기 */
+.stream {
+  background:
+    repeating-linear-gradient(180deg, rgba(255, 255, 255, 0) 0, rgba(255, 255, 255, 0.75) 8px, rgba(255, 255, 255, 0) 16px, rgba(255, 255, 255, 0) 26px),
+    linear-gradient(90deg, rgba(95, 211, 245, 0.85), rgba(225, 250, 255, 0.95) 40%, rgba(150, 228, 250, 0.9) 60%, rgba(60, 192, 236, 0.85));
+  background-size:
+    100% 26px,
+    100% 100%;
+  animation: stream 0.55s linear infinite;
+  border-radius: 10px 10px 45% 45%;
+  box-shadow: 0 0 18px rgba(255, 255, 255, 0.8), inset 0 0 6px rgba(11, 74, 117, 0.15);
+}
+@keyframes stream {
+  from {
+    background-position:
+      0 0,
+      0 0;
+  }
+  to {
+    background-position:
+      0 26px,
+      0 0;
+  }
+}
+/* 물보라 물방울 — 튀어 올랐다 떨어짐 */
+.splash {
+  animation: splash 1.1s ease-out infinite;
+}
+@keyframes splash {
+  0% {
+    transform: translate(0, 0) scale(0.6);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  55% {
+    transform: translate(var(--sx), -26px) scale(1);
+  }
+  100% {
+    transform: translate(calc(var(--sx) * 1.6), 6px) scale(0.7);
+    opacity: 0;
+  }
+}
+/* 배경에서 떨어지는 물방울 */
+.drip {
+  position: absolute;
+  top: -40px;
+  animation: drip linear infinite;
+}
+@keyframes drip {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.9;
+  }
+  85% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(110vh) rotate(8deg);
+    opacity: 0;
+  }
+}
+
+/* 흰 시트 — 위 가장자리는 Surface(움직이는 물결)가 덮음 */
+.sheet {
+  position: relative;
+  background: #f4fcff;
+}
+
+/* ── 진행 관 ── */
+.pipe-seg {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: inset 0 0 0 1.5px rgba(11, 74, 117, 0.25);
+}
+.pipe-seg[data-fill='1'] {
+  background: var(--water);
+  box-shadow: inset 0 0 0 1.5px rgba(11, 74, 117, 0.35);
+  transition: background 1s ease;
+}
+.pipe-seg[data-now='1']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0, rgba(255, 255, 255, 0.85) 50%, transparent 100%);
+  background-size: 60% 100%;
+  background-repeat: no-repeat;
+  animation: pipe-flow 1.6s linear infinite;
+}
+@keyframes pipe-flow {
+  from {
+    background-position: -120% 0;
+  }
+  to {
+    background-position: 220% 0;
+  }
+}
+
+/* 섬 둥실 */
+.float-slow {
+  animation: float-slow 5s ease-in-out infinite;
+}
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2.2%);
+  }
+}
+/* 반짝 */
+.twinkle {
+  animation: twinkle 2.6s ease-in-out infinite;
+}
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.15;
+    transform: scale(0.6) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15) rotate(20deg);
+  }
+}
+
+/* 물방울 캐릭터 둥실 */
+.drop-bob {
+  animation: drop-bob 3s ease-in-out infinite;
+  transform-origin: 50% 92%;
+}
+@keyframes drop-bob {
+  0%,
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+  50% {
+    transform: translateY(-5%) scale(0.98, 1.025);
+  }
+}
+/* 눈 깜빡 */
+.blink {
+  animation: blink 4.2s infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@keyframes blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.1);
+  }
+}
+/* 물결 동심원 */
+.ripple {
+  animation: ripple 2.8s ease-out infinite;
+  transform-origin: center;
+}
+.ripple.d2 {
+  animation-delay: 1.4s;
+}
+@keyframes ripple {
+  from {
+    transform: scale(0.4);
+    opacity: 0.8;
+  }
+  to {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+.shake {
+  animation: shake 0.42s ease;
+}
+@keyframes shake {
+  20% {
+    transform: translateX(-6px);
+  }
+  40% {
+    transform: translateX(6px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
+
+/* 그림 자리(힉스필드 그림이 들어갈 곳) */
+.img-slot {
+  background:
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0 12px, transparent 12px 24px),
+    linear-gradient(160deg, #6fd6f2, #1d9fd6);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caustic,
+  .bubble,
+  .drop-bob,
+  .blink,
+  .ripple,
+  .wave-move,
+  .breathe,
+  .float-slow,
+  .twinkle,
+  .liquid::before,
+  .liquid::after,
+  .cta::after,
+  .stream,
+  .splash,
+  .drip,
+  .pipe-seg[data-now='1']::after {
+    animation: none !important;
+  }
+  .bubble,
+  .drip,
+  .splash {
+    display: none;
+  }
+}
