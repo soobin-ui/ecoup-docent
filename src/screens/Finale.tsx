@@ -300,7 +300,7 @@ export function SurveyScreen({ p, update, onDone }: { p: Progress; update: Upd; 
 }
 
 /* ── 08 기념품 교환 ────────────────────────────────── */
-export function ExchangeScreen({ p, update }: { p: Progress; update: Upd }) {
+export function ExchangeScreen({ p, update, onHome }: { p: Progress; update: Upd; onHome: () => void }) {
   const [pinOpen, setPinOpen] = useState(false)
   const [pin, setPin] = useState('')
   const [msg, setMsg] = useState('')
@@ -437,6 +437,14 @@ export function ExchangeScreen({ p, update }: { p: Progress; update: Upd }) {
           >
             <span className="absolute inset-y-0 left-0 bg-[#d6eef6]" style={{ width: holding ? '100%' : '0%', transition: holding ? 'width 0.9s linear' : 'none' }} />
             <span className="relative">{holding ? EXCHANGE.staffHold : EXCHANGE.staffBtn}</span>
+          </button>
+        )}
+        {/* 처음 화면으로 — 스탬프·교환 기록은 그대로(중복 수령 방지) */}
+        {p.exchanged ? (
+          <Button onClick={onHome}>{EXCHANGE.home}</Button>
+        ) : (
+          <button onClick={onHome} className="mt-1 h-11 w-full text-[clamp(14.5px,4.1vw,17px)] font-bold text-mute underline underline-offset-4">
+            {EXCHANGE.home}
           </button>
         )}
       </BottomBar>

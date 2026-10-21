@@ -122,6 +122,9 @@ await shot('pin', false)
 await click('교환 완료 처리')
 await sleep(900)
 await shot('exchange_완료')
+await click('처음 화면으로')
+await sleep(1500)
+await shot('home_after_exchange', false)
 
 // 이어하기: 새로 열면 '이어서 하기'
 await page.evaluate(() => {

@@ -297,6 +297,7 @@ export const EXCHANGE = {
   missing: '아직 못 받은 스탬프가 있어요',
   goMissing: '이 섹션으로 가기',
   offline: '연결이 불안정해 임시 번호로 표시했어요. 스태프에게 보여 주세요.',
+  home: '처음 화면으로',
 }
 
 export const STAFF = {

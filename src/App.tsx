@@ -95,7 +95,7 @@ export default function App() {
       body = <SurveyScreen p={p} update={update} onDone={() => go('exchange')} />
       break
     case 'exchange':
-      body = <ExchangeScreen p={p} update={update} />
+      body = <ExchangeScreen p={p} update={update} onHome={() => go('intro')} />
       break
   }
 
