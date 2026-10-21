@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import type { Mission } from '../content/tour'
 import { STAMPS } from '../content/tour'
-import { Button, Character, Waves } from './ui'
+import { Button, Character } from './ui'
 import { Icon } from './Icons'
 
 /** 미션 상태 — 화면이 아래 버튼('정답 확인')을 직접 그리도록 바깥으로 꺼냄 */
@@ -97,8 +97,11 @@ export function StampOverlay({ m, onNext, nextLabel }: { m: Mission; onNext: () 
     >
       {/* 차오르는 물 */}
       <motion.div className="pointer-events-none fixed inset-x-0 bottom-0" initial={{ height: '0%' }} animate={{ height: '38%' }} transition={{ duration: 1.4, ease: [0.3, 0.9, 0.3, 1] }}>
-        <Waves className="absolute inset-x-0 -top-10 h-12" color="#3db7e4" front="#1a94cf" />
-        <div className="absolute inset-x-0 top-0 bottom-0" style={{ background: 'linear-gradient(180deg,#1a94cf,#0b5c90)' }} />
+        {/* 위는 투명하게 시작해 점점 깊어지는 물 — 하늘과 경계선 없이 */}
+        <div className="absolute inset-x-0 -top-[45%] bottom-0" style={{ background: 'linear-gradient(180deg, rgba(76,196,234,0) 0%, rgba(61,183,228,.45) 28%, #2aa8e0 55%, #1d93cf 100%)' }} />
+        <svg className="wave-move slow absolute -top-[18%] h-[40px] w-[200%] opacity-60" viewBox="0 0 800 40" preserveAspectRatio="none" aria-hidden>
+          <path d="M0 20 Q50 8 100 20 T200 20 T300 20 T400 20 T500 20 T600 20 T700 20 T800 20" fill="none" stroke="#fff" strokeOpacity=".6" strokeWidth="2" />
+        </svg>
       </motion.div>
 
       <div className="relative mx-auto flex min-h-full max-w-[440px] flex-col items-center px-6 pt-[clamp(24px,7vh,64px)] pb-8 text-center">

@@ -3,12 +3,15 @@ import { motion } from 'framer-motion'
 import { INTRO } from '../content/tour'
 import type { Progress, Step } from '../lib/progress'
 import { STEPS } from '../lib/progress'
-import { SeaBackground, Surface } from '../components/ui'
+import { SeaBackground } from '../components/ui'
 import hero from '../assets/img/hero.webp'
 import heroLoop from '../assets/img/hero-loop.mp4'
 import { Icon } from '../components/Icons'
 
 /** 그림 가장자리를 배경 물빛에 녹여 네모 테두리가 안 보이게 */
+/** 하늘(투명) → 맑은 물 → 깊은 물, 중간에 단단한 경계 없이 */
+const SEA_FADE =
+  'linear-gradient(180deg, rgba(54,189,236,0) 0%, rgba(54,189,236,0) 52%, rgba(54,189,236,.35) 64%, rgba(38,170,225,.75) 76%, #1e9bd6 88%, #1689c6 100%)'
 const MASK = 'radial-gradient(ellipse 56% 50% at 50% 50%, #000 72%, transparent 100%)'
 /** 폭포·맑은 물 위 반짝임(그림 기준 %) */
 const SPARKS = [
@@ -45,6 +48,14 @@ export function IntroScreen({ p, go, restart }: { p: Progress; go: (s: Step) => 
     <>
       <SeaBackground />
       <main className="relative z-10 mx-auto flex h-dvh w-full max-w-[480px] flex-col overflow-hidden">
+        {/* 하늘 → 물: 한 장으로 이어지는 그라데이션(띠·경계선 없이) */}
+        <div className="pointer-events-none absolute inset-0" aria-hidden style={{ background: SEA_FADE }} />
+        <div className="pointer-events-none absolute inset-x-0 top-[66%] h-[60px] overflow-hidden opacity-70" aria-hidden>
+          <svg className="wave-move slow absolute top-0 h-full w-[200%]" viewBox="0 0 800 60" preserveAspectRatio="none">
+            <path d="M0 20 Q50 8 100 20 T200 20 T300 20 T400 20 T500 20 T600 20 T700 20 T800 20" fill="none" stroke="#fff" strokeOpacity=".55" strokeWidth="2" />
+            <path d="M0 44 Q66 32 133 44 T266 44 T400 44 T533 44 T666 44 T800 44" fill="none" stroke="#fff" strokeOpacity=".35" strokeWidth="2" />
+          </svg>
+        </div>
         {/* ── 제목 ── */}
         <div className="shrink-0 px-5 pt-[clamp(14px,8.5vh,96px)] text-center">
           <motion.span
@@ -111,8 +122,7 @@ export function IntroScreen({ p, go, restart }: { p: Progress; go: (s: Step) => 
         </div>
 
         {/* ── 물웅덩이 + 시작 버튼 ── */}
-        <div className="relative shrink-0 px-5 pt-[min(36px,4.5vh)] pb-[max(min(84px,7.5vh),calc(env(safe-area-inset-bottom)+16px))]" style={{ background: 'linear-gradient(180deg,#36bdec 0%,#1592cf 40%,#0b5c90 100%)' }}>
-          <Surface className="-top-[22px] h-[24px]" color="#36bdec" back="rgba(160,230,250,.75)" />
+        <div className="relative shrink-0 px-5 pt-[min(36px,4.5vh)] pb-[max(min(84px,7.5vh),calc(env(safe-area-inset-bottom)+16px))]">
           <motion.div className="relative flex flex-col gap-2" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}>
             <div className="mb-[min(12px,1.4vh)] flex justify-center gap-2 text-[clamp(14.5px,4.1vw,17px)] font-bold text-white">
               <span className="flex items-center gap-1 whitespace-nowrap rounded-full bg-white/20 px-3 py-1.5 ring-1 ring-white/45">
