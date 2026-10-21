@@ -73,10 +73,9 @@ export const PARTNERS = {
   members: [
     { name: '고려대학교', note: '기후변화 적응', logo: 'ku' },
     { name: '건국대학교', note: '자원 순환·생물 다양성', logo: 'konkuk' },
-    { name: '영남대학교', note: '물의 지속가능한 보전', logo: 'yu', water: true },
+    { name: '영남대학교', note: '물의 지속가능한 보전', logo: 'yu' },
     { name: '전주비전대학교', note: '온실가스 감축', logo: 'jvision' },
   ],
-  waterNote: '스마트 물산업 인재양성 주관 — 오늘 전시와 같은 물 분야',
   city: { name: '세종특별자치시', note: '정책·행정 지원 · 녹색도시 리빙랩', logo: 'sejong' },
   cta: '전시 보러 가기',
 }

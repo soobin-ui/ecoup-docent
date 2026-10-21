@@ -133,7 +133,7 @@ export function PartnersScreen({ onNext }: { onNext: () => void }) {
     { ...PARTNERS.lead_, tag: '주관', tagCls: 'bg-sea text-white' },
     ...PARTNERS.members.map((m) => ({ ...m, tag: '', tagCls: '' })),
     { ...PARTNERS.city, tag: '지자체', tagCls: 'bg-eco text-white' },
-  ] as { name: string; note: string; logo: string; tag: string; tagCls: string; water?: boolean }[]
+  ] as { name: string; note: string; logo: string; tag: string; tagCls: string }[]
   return (
     <>
       <Hero eyebrow={PARTNERS.eyebrow} title={PARTNERS.title} />
@@ -145,7 +145,7 @@ export function PartnersScreen({ onNext }: { onNext: () => void }) {
               <motion.div
                 key={r.name}
                 {...fade(i)}
-                className={`flex items-center gap-3 px-3.5 py-[min(11px,1.35vh)] ${i ? 'border-t border-line' : ''} ${r.water ? 'bg-[#e6f8fc]' : ''}`}
+                className={`flex items-center gap-3 px-3.5 py-[min(11px,1.35vh)] ${i ? 'border-t border-line' : ''}`}
               >
                 <span className="grid w-[clamp(52px,8vh,72px)] shrink-0 place-items-center">
                   <img src={LOGOS[r.logo]} alt="" className="h-[clamp(26px,4.2vh,38px)] max-w-full object-contain" />
@@ -155,9 +155,8 @@ export function PartnersScreen({ onNext }: { onNext: () => void }) {
                     {r.name}
                     {r.tag && <span className={`rounded-full px-1.5 py-0.5 text-[clamp(11px,3.21vw,13.5px)] ${r.tagCls}`}>{r.tag}</span>}
                   </p>
-                  <p className={`text-[clamp(13.5px,3.85vw,16px)] ${r.water ? 'font-bold text-cyan' : 'text-mute'}`}>{r.note}</p>
+                  <p className="text-[clamp(13.5px,3.85vw,16px)] text-mute">{r.note}</p>
                 </div>
-                {r.water && <Icon name="water" size={18} className="shrink-0 text-cyan" />}
               </motion.div>
             ))}
           </div>
