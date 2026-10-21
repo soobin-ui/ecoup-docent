@@ -112,11 +112,11 @@ export function StampOverlay({ m, onNext, nextLabel }: { m: Mission; onNext: () 
           initial={{ opacity: 0, scale: 0.85 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ type: 'spring', stiffness: 240, damping: 15, delay: 0.25 }}
-          className="title-shadow mt-3 text-[clamp(28px,8.6vw,36px)] font-bold leading-[1.2]"
+          className="title-shadow mt-3 text-[clamp(26px,7.8vw,34px)] font-bold leading-[1.22]"
           style={{ ['--stroke' as never]: '5px' }}
         >
-          <span className="stroke-title block text-white">물방울이 한 번 더</span>
-          <span className="stroke-title block text-lime">맑아졌어요!</span>
+          <span className="stroke-title block text-white">{m.cheer[0]}</span>
+          <span className="stroke-title block text-lime">{m.cheer[1]}</span>
         </motion.h2>
 
         <div className="relative mt-6 grid h-[min(170px,26vh)] w-[min(170px,26vh)] shrink-0 place-items-center">

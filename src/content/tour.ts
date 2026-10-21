@@ -181,6 +181,7 @@ export type Mission = {
   answer: number // options 인덱스
   hint: string // 틀렸을 때 한 줄
   done: string // 맞혔을 때 한 줄
+  cheer: [string, string] // 성공 화면 큰 제목(윗줄 흰색 / 아랫줄 연두)
 }
 
 export const MISSIONS: Mission[] = [
@@ -191,6 +192,7 @@ export const MISSIONS: Mission[] = [
     answer: 1,
     hint: '설거지할 때 그릇에 무엇이 남아 있었는지 떠올려 보세요.',
     done: '음식물 찌꺼기는 썩으면서 물속 산소를 빼앗는 유기물이에요.',
+    cheer: ['정답이에요!', '흙탕물이 조금 맑아졌어요'],
   },
   {
     no: 2,
@@ -199,6 +201,7 @@ export const MISSIONS: Mission[] = [
     answer: 0,
     hint: '세 번째 카드 ‘미생물이 먹어 치워요’를 다시 읽어 보세요.',
     done: '미생물은 유기물을 먹고 분해하는 작은 청소부예요.',
+    cheer: ['정답이에요!', '점점 깨끗해지고 있어요'],
   },
   {
     no: 3,
@@ -207,6 +210,7 @@ export const MISSIONS: Mission[] = [
     answer: 0,
     hint: '‘반도체’ 칸을 눌러 보세요. 아주 순수한 물이라는 뜻의 이름이에요.',
     done: '초순수는 불순물을 거의 다 걸러 낸, 세상에서 가장 깨끗한 물이에요.',
+    cheer: ['정답이에요!', '드디어 맑은 물이 됐어요'],
   },
 ]
 
