@@ -245,12 +245,16 @@ export function Title({ lines, className = '', size }: { lines: string[]; classN
   )
 }
 
+/** 시트 위 그라데이션: 길고 완만하게(ease) — 짧으면 배경이 어두워지는 곳과 만나 '접힌 선'이 보임 */
+const SHEET_FADE =
+  'linear-gradient(180deg, rgba(244,252,255,0) 0%, rgba(244,252,255,.05) 18%, rgba(244,252,255,.14) 34%, rgba(244,252,255,.28) 50%, rgba(244,252,255,.47) 64%, rgba(244,252,255,.68) 78%, rgba(244,252,255,.87) 90%, #f4fcff 100%)'
+
 /** 흰 시트 — 위쪽이 물결, 화면 끝까지 */
 export function Sheet({ children }: { children: ReactNode }) {
   return (
     <section className="sheet -mx-5 flex min-h-0 flex-1 flex-col px-5 pt-[min(16px,2vh)]">
       {/* 물빛 → 흰 시트: 선 없이 서서히 밝아지게(글자·그림 뒤로 깔림) */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-full -z-10 h-[clamp(56px,9vh,96px)]" style={{ background: 'linear-gradient(180deg, rgba(244,252,255,0) 0%, rgba(244,252,255,.55) 55%, var(--sheet) 100%)' }} aria-hidden />
+      <div className="pointer-events-none absolute inset-x-0 bottom-full -z-10 h-[clamp(170px,30vh,280px)]" style={{ background: SHEET_FADE }} aria-hidden />
       {children}
     </section>
   )
