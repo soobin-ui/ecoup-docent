@@ -27,7 +27,7 @@ export function StaffScreen() {
       <main className="mx-auto flex min-h-dvh max-w-[480px] flex-col justify-center px-6">
         <h1 className="text-[clamp(26px,7.2vw,30px)] font-bold">{STAFF.title}</h1>
         <p className="mt-1 text-[15px] text-mute">
-          {EVENT.hall} · {SERVER_MODE ? '서버 연결' : '시안 모드(이 브라우저에만 저장, 번호 0000)'}
+          {EVENT.hall} · {SERVER_MODE ? '구글 시트 연결' : '시안 모드(이 브라우저에만 저장, 번호 0000)'}
         </p>
         <input
           value={pin}
