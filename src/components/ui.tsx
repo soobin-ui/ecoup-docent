@@ -152,18 +152,20 @@ export function Droplet({
   )
 }
 
-/** 상단 진행 관: 소개 · 1 · 2 · 3 · 체험 */
-export function Pipe({ seg }: { seg: number }) {
+/** 상단 스탬프 표시: 칸 3개 + n/3 */
+export function StampDots({ stamps }: { stamps: boolean[] }) {
+  const n = stamps.filter(Boolean).length
   return (
-    <div className="flex items-center gap-[3px]" aria-label={`진행 ${seg + 1}/5`}>
-      {[0, 1, 2, 3, 4].map((i) => (
-        <span key={i} className="pipe-seg block h-[8px] w-[20px] rounded-full" data-fill={i <= seg ? '1' : '0'} data-now={i === seg ? '1' : '0'} />
+    <div className="flex items-center gap-[4px]" aria-label={`스탬프 ${n}/3`}>
+      {stamps.map((on, i) => (
+        <span key={i} className="pipe-seg block h-[12px] w-[16px] rounded-[4px]" data-fill={on ? '1' : '0'} />
       ))}
+      <span className="ml-1 text-[clamp(13px,3.72vw,15.5px)] font-bold text-sea">{n}/3</span>
     </div>
   )
 }
 
-export function Header({ seg, onBack }: { seg: number; onBack?: () => void }) {
+export function Header({ stamps, onBack }: { stamps: boolean[]; onBack?: () => void }) {
   return (
     <header className="relative z-20 -mx-5 flex h-14 shrink-0 items-center gap-1.5 px-5">
       {onBack ? (
@@ -178,7 +180,7 @@ export function Header({ seg, onBack }: { seg: number; onBack?: () => void }) {
         <span className="max-[359px]:hidden">에코업 </span>수처리 전시관
       </span>
       <span className="ml-auto">
-        <Pipe seg={seg} />
+        <StampDots stamps={stamps} />
       </span>
     </header>
   )

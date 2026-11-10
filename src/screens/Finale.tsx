@@ -1,233 +1,349 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { COMPLETE, EXCHANGE, HANDSON, STAMPS, SURVEY } from '../content/tour'
+import { COMPLETE, CONTEST, HANDS, REGISTER, STAMP_GET, SURVEY, TICKET, WATER_STATION } from '../content/tour'
 import type { Progress } from '../lib/progress'
-import { dayLabel, nowKST, scheduleDay } from '../lib/day'
-import { dayLetter, getClosedSlots, getStatus, staffExchange, submitSurvey } from '../lib/api'
-import type { SlotKey } from '../lib/api'
-import { BottomBar, Button, Card, Character, Hero, ImageSlot, Sheet } from '../components/ui'
-import { Face, Icon } from '../components/Icons'
+import { stampLabel } from '../lib/day'
+import { getTicket, registerTicket, staffUse } from '../lib/api'
+import { BottomBar, Button, Card, Character, Hero, Sheet } from '../components/ui'
+import { Icon } from '../components/Icons'
+import { StampBoard } from '../components/Mission'
+import { Scanner } from '../components/Scanner'
+import { LOGOS } from './Info'
 
 type Upd = (patch: Partial<Progress> | ((p: Progress) => Partial<Progress>)) => void
+const fade = (i: number) => ({ initial: { opacity: 0, y: 10 }, animate: { opacity: 1, y: 0 }, transition: { delay: 0.1 + i * 0.07 } })
+const t15 = 'text-[clamp(15px,4.23vw,17.5px)]'
 
-/* ── 미션 3개 완료 ─────────────────────────────────── */
-const CONFETTI = Array.from({ length: 16 }, (_, i) => ({
-  x: (i * 61) % 100,
-  d: 2.6 + ((i * 7) % 10) / 6,
-  delay: ((i * 13) % 10) / 8,
-  c: ['#c8f169', '#ffffff', '#00add0', '#0fb04a', '#ffe15a'][i % 5],
-  s: 10 + ((i * 5) % 8),
-}))
-export function CompleteScreen({ onNext }: { onNext: () => void }) {
+/* ── 스탬프 획득(1/3 · 2/3) · 3개 완성 ─────────────── */
+export function StampGetScreen({ p, which, onNext }: { p: Progress; which: 0 | 1 | 2; onNext: () => void }) {
+  const g = STAMP_GET[which]
+  const done = which === 2
   return (
     <>
-      {/* 물방울 모양 축하 조각 */}
-      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden>
-        {CONFETTI.map((c, i) => (
-          <motion.svg
-            key={i}
-            width={c.s}
-            height={c.s * 1.2}
-            viewBox="0 0 50 60"
-            className="absolute"
-            style={{ left: `${c.x}%`, top: -30 }}
-            initial={{ y: -40, rotate: 0 }}
-            animate={{ y: '110vh', rotate: 200 }}
-            transition={{ duration: c.d, delay: c.delay, ease: 'easeIn', repeat: 1 }}
-          >
-            <path d="M25 2C25 2 4 27 4 39a21 21 0 0 0 42 0C46 27 25 2 25 2z" fill={c.c} stroke="#0b4a75" strokeWidth="3" />
-          </motion.svg>
+      <div className="flex flex-col items-center pt-2 text-center">
+        <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', delay: 0.1 }} className="rounded-full bg-sea px-4 py-1.5 text-[clamp(13.5px,3.85vw,16px)] font-bold tracking-wide text-white">
+          {g.label}
+        </motion.span>
+        <motion.h1
+          initial={{ opacity: 0, scale: 0.85 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ type: 'spring', stiffness: 240, damping: 15, delay: 0.2 }}
+          className="title-shadow mt-3 text-[clamp(27px,8vw,35px)] font-bold leading-[1.2]"
+          style={{ ['--stroke' as never]: '5px' }}
+        >
+          <span className="stroke-title block text-lime">{g.title}</span>
+        </motion.h1>
+      </div>
+      <motion.div {...fade(1)} className="mt-5 rounded-3xl bg-white/95 p-4 shadow-[0_10px_30px_-14px_rgba(8,60,100,0.45)]">
+        <StampBoard got={p.stamps} fresh={which} />
+      </motion.div>
+      {done ? (
+        <motion.div {...fade(3)} className="mt-5 rounded-3xl border-2 border-[#f3cf6a] bg-[#fff1bf] p-5 text-center shadow-[0_10px_30px_-14px_rgba(160,110,0,0.45)]">
+          <Icon name="gift" size={52} className="mx-auto text-[#d97706]" />
+          <p className="mt-2 text-[clamp(22px,6.2vw,27px)] font-bold text-sea">{COMPLETE.giftHead}</p>
+          {COMPLETE.giftBody.map((l) => (
+            <p key={l} className={`${t15} mt-1 text-[#7a4a00]`}>
+              {l}
+            </p>
+          ))}
+        </motion.div>
+      ) : (
+        <div className="mt-4 flex flex-1 items-center justify-center">
+          <Character level={3} size={Math.min(170, Math.round(window.innerHeight * 0.2))} bob />
+        </div>
+      )}
+      <BottomBar tone="none">
+        {!done && <p className="mb-3 text-center text-[clamp(18px,5vw,21px)] font-bold text-sea">{g.next}</p>}
+        <Button onClick={onNext} breathe>
+          {done ? COMPLETE.cta : '다음'}
+        </Button>
+      </BottomBar>
+    </>
+  )
+}
+
+/* ── 워터 스테이션 ──────────────────────────────── */
+function Fridge() {
+  return (
+    <svg viewBox="0 0 160 200" className="h-[clamp(150px,26vh,220px)] w-auto" aria-hidden>
+      <rect x="14" y="8" width="132" height="184" rx="16" fill="#0b4a75" />
+      <rect x="24" y="18" width="112" height="164" rx="10" fill="#dff6ff" stroke="#7fd8f2" strokeWidth="3" />
+      {[0, 1, 2].map((row) => (
+        <g key={row}>
+          <rect x="30" y={70 + row * 50} width="100" height="4" rx="2" fill="#7fd8f2" />
+          {[0, 1, 2, 3].map((k) => (
+            <g key={k} transform={`translate(${38 + k * 24} ${34 + row * 50})`}>
+              <rect x="2" y="0" width="8" height="6" rx="1.5" fill="#00add0" />
+              <rect x="0" y="5" width="12" height="31" rx="4" fill="#5fd0ee" />
+              <rect x="0" y="16" width="12" height="7" fill="#fff" opacity=".8" />
+            </g>
+          ))}
+        </g>
+      ))}
+      <rect x="128" y="80" width="5" height="40" rx="2.5" fill="#fff" opacity=".7" />
+    </svg>
+  )
+}
+export function WaterScreen({ onNext }: { onNext: () => void }) {
+  return (
+    <>
+      <Hero center eyebrow="잠깐!" title={WATER_STATION.title} />
+      <div className="flex flex-1 flex-col items-center text-center">
+        <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', delay: 0.2 }}>
+          <Fridge />
+        </motion.div>
+        <p className="mt-5 text-[clamp(24px,6.8vw,30px)] font-bold text-sea">{WATER_STATION.head}</p>
+        {WATER_STATION.body.map((l) => (
+          <p key={l} className={`${t15} mt-1 text-sea/85`}>
+            {l}
+          </p>
         ))}
       </div>
-      <Hero eyebrow="TOUR COMPLETE" title={COMPLETE.title} center />
-      <div className="relative -mt-4 flex flex-col items-center text-center">
-        <div className="relative grid h-[190px] w-[190px] place-items-center">
-          <span className="ripple absolute inset-0 rounded-full border-4 border-white/80" />
-          <span className="ripple d2 absolute inset-0 rounded-full border-4 border-white/80" />
-          <motion.div initial={{ scale: 0.5, y: 30 }} animate={{ scale: 1, y: [30, -30, 0, -10, 0] }} transition={{ duration: 1.1 }}>
-            <Character level={3} size={170} bob />
-          </motion.div>
-        </div>
-        <div className="mt-2 flex items-end gap-1.5 rounded-full bg-white/70 px-4 py-2">
-          {[0, 1, 2, 3].map((c) => (
-            <span key={c} className="flex items-end gap-1.5">
-              <Character level={c} size={c === 3 ? 46 : 36} />
-              {c < 3 && <span className="pb-2 text-[clamp(14.5px,4.1vw,17px)] font-bold text-sea/60">→</span>}
-            </span>
-          ))}
-        </div>
-      </div>
-      <Sheet>
-        <p className="text-center text-[clamp(16px,4.49vw,18.5px)] leading-[1.65] text-ink">{COMPLETE.lead}</p>
-        <div className="mt-5 flex justify-center gap-3">
-          {STAMPS.map((s) => (
-            <div key={s} className="flex h-[72px] w-[72px] -rotate-6 flex-col items-center justify-center rounded-full border-[3px] border-sea bg-lime text-[clamp(13px,3.72vw,15.5px)] font-bold leading-tight text-sea shadow-[0_4px_0_#0b4a75]">
-              {s.split(' ').map((w) => (
-                <span key={w} className="block">
-                  {w}
+      <BottomBar tone="none">
+        <Button onClick={onNext}>{WATER_STATION.cta}</Button>
+      </BottomBar>
+    </>
+  )
+}
+
+/* ── 경진대회 소개 ──────────────────────────────── */
+export function ContestScreen({ onNext }: { onNext: () => void }) {
+  return (
+    <>
+      <motion.div {...fade(0)} className="mt-2 rounded-3xl border-2 border-[#f3cf6a] bg-[#fff6d6] px-4 py-6 text-center">
+        <Icon name="trophy" size={64} className="mx-auto text-[#e0a100]" />
+        <span className="mt-3 inline-block rounded-full bg-sea px-3 py-1 text-[clamp(12.5px,3.59vw,15px)] font-bold tracking-[0.2em] text-white">{CONTEST.tag}</span>
+        <h1 className="mt-3 text-[clamp(21px,6vw,26px)] font-bold leading-snug text-sea">
+          {CONTEST.title.map((t) => (
+            <span key={t} className="block">
+              {t.split('ZERO-WASTE').map((part, i, arr) => (
+                <span key={i}>
+                  {part}
+                  {i < arr.length - 1 && <span className="whitespace-nowrap">ZERO-WASTE</span>}
                 </span>
               ))}
-            </div>
+            </span>
+          ))}
+        </h1>
+        <p className={`${t15} mt-2 leading-relaxed text-ink`}>
+          {CONTEST.body.split('ZERO-WASTE')[0]}
+          <span className="whitespace-nowrap">ZERO-WASTE</span>
+          {CONTEST.body.split('ZERO-WASTE')[1]}
+        </p>
+      </motion.div>
+      <motion.div {...fade(1)} className="mt-6 text-center">
+        <p className="text-[clamp(14.5px,4.1vw,17px)] font-bold text-[#c2410c]">{CONTEST.finalists}</p>
+        <p className="mt-1 text-[clamp(20px,5.6vw,24px)] font-bold leading-snug text-sea">
+          {CONTEST.ask[0]}
+          <br />
+          {CONTEST.ask[1]}
+        </p>
+      </motion.div>
+      <BottomBar tone="none">
+        <Button onClick={onNext} breathe>
+          {CONTEST.cta}
+        </Button>
+      </BottomBar>
+    </>
+  )
+}
+
+/* QR 안내 상자 */
+function QrNote({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="mt-4 flex gap-3 rounded-3xl border-2 border-[#f3b24a] bg-[#fff6d6] p-4">
+      <Icon name="qr" size={34} className="shrink-0 text-[#b45309]" />
+      <div>
+        <p className="text-[clamp(16.5px,4.62vw,19px)] font-bold text-[#8a4b00]">{title}</p>
+        <p className={`${t15} mt-1 leading-snug text-[#8a4b00]`}>{body}</p>
+      </div>
+    </div>
+  )
+}
+
+/* ── 경진대회 작품 5팀 + QR ─────────────────────── */
+export function WorksScreen({ onStamp }: { onStamp: () => void }) {
+  const [scan, setScan] = useState(false)
+  return (
+    <>
+      <Hero eyebrow={CONTEST.worksEyebrow} title={CONTEST.worksTitle} />
+      <Sheet>
+        <div className="flex flex-col gap-2.5">
+          {CONTEST.teams.map((t, i) => (
+            <motion.div key={t.team} {...fade(i)} className="rounded-3xl bg-white px-4 py-3 shadow-[0_6px_18px_-12px_rgba(8,60,100,0.35)]">
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-sea px-2.5 py-0.5 text-[clamp(13.5px,3.85vw,16px)] font-bold text-white">팀 {t.team}</span>
+                <span className="ml-auto flex items-center gap-1.5 text-[clamp(12.5px,3.59vw,15px)] text-mute">
+                  <img src={LOGOS[t.logo]} alt="" className="h-5 w-auto max-w-[44px] object-contain" />
+                  {t.school}
+                </span>
+              </div>
+              <p className="mt-2 text-[clamp(15.5px,4.36vw,18px)] font-bold leading-snug text-ink">{t.idea}</p>
+            </motion.div>
           ))}
         </div>
+        <QrNote title={CONTEST.qrTitle} body={CONTEST.qrBody} />
         <BottomBar>
-          <Button onClick={onNext} breathe>
-            {COMPLETE.cta}
+          <Button onClick={() => setScan(true)} breathe>
+            <Icon name="qr" size={22} /> {CONTEST.qrCta}
           </Button>
+        </BottomBar>
+      </Sheet>
+      {scan && <Scanner kind="contest" title={CONTEST.scanTitle} onStamp={onStamp} onClose={() => setScan(false)} />}
+    </>
+  )
+}
+
+/* ── 체험 2종 + QR ──────────────────────────────── */
+export function HandsScreen({ onStamp }: { onStamp: () => void }) {
+  const [scan, setScan] = useState(false)
+  return (
+    <>
+      <Hero eyebrow={HANDS.eyebrow} title={HANDS.title} lead={HANDS.lead} />
+      <Sheet>
+        <div className="flex flex-col gap-3">
+          {HANDS.programs.map((pr, i) => (
+            <motion.div key={pr.id} {...fade(i)}>
+              <Card className="flex gap-3.5 p-4">
+                <span className="grid h-[68px] w-[68px] shrink-0 place-items-center rounded-2xl bg-eco text-white">
+                  <Icon name={pr.icon} size={34} />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-[clamp(18px,5vw,21px)] font-bold text-ink">{pr.name}</p>
+                  <p className={`${t15} mt-0.5 leading-snug text-mute`}>{pr.desc}</p>
+                  <span className="mt-2 inline-block rounded-full bg-[#e6f7ee] px-2.5 py-1 text-[clamp(13px,3.72vw,15.5px)] font-bold text-eco">{pr.gift}</span>
+                </div>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+        <QrNote title={HANDS.qrTitle} body={HANDS.qrBody} />
+        <BottomBar>
+          <Button onClick={() => setScan(true)} breathe>
+            <Icon name="qr" size={22} /> {HANDS.qrCta}
+          </Button>
+        </BottomBar>
+      </Sheet>
+      {scan && <Scanner kind="hands" title={HANDS.scanTitle} onStamp={onStamp} onClose={() => setScan(false)} />}
+    </>
+  )
+}
+
+/* ── 참가자 등록 1/2 ─────────────────────────────── */
+export function RegisterScreen({ p, update, onNext }: { p: Progress; update: Upd; onNext: () => void }) {
+  const [name, setName] = useState(p.reg?.name ?? '')
+  const [phone, setPhone] = useState(p.reg?.phone8 ?? '')
+  const [who, setWho] = useState(p.reg?.who ?? '')
+  const [agree, setAgree] = useState(p.reg?.consent ?? false)
+  const [err, setErr] = useState('')
+
+  const next = () => {
+    if (name.trim().length < 2) return setErr(REGISTER.errName)
+    if (!/^\d{8}$/.test(phone)) return setErr(REGISTER.errPhone)
+    if (!who) return setErr(REGISTER.errWho)
+    if (!agree) return setErr(REGISTER.errConsent)
+    update({ reg: { name: name.trim(), phone8: phone, who, consent: true } })
+    onNext()
+  }
+  const lab = 'text-[clamp(16px,4.5vw,18.5px)] font-bold text-ink'
+  return (
+    <>
+      <Hero eyebrow={REGISTER.eyebrow} title={REGISTER.title} />
+      <Sheet>
+        <label className="block">
+          <span className={lab}>{REGISTER.name.label}</span>
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value.slice(0, 20))}
+            placeholder={REGISTER.name.placeholder}
+            autoComplete="name"
+            className="mt-2 h-14 w-full rounded-2xl border-2 border-line bg-white px-4 outline-none focus:border-sea"
+          />
+        </label>
+        <div className="mt-5">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-2">
+            <span className={lab}>{REGISTER.phone.label}</span>
+            <span className="text-[clamp(12.5px,3.59vw,15px)] font-bold text-[#c2410c]">{REGISTER.phone.note}</span>
+          </div>
+          <div className="mt-2 flex items-center gap-2">
+            <span className="grid h-14 w-[72px] shrink-0 place-items-center rounded-2xl bg-[#e8f0f3] text-[18px] font-bold text-mute">010</span>
+            <span className="text-mute">-</span>
+            <input
+              value={phone}
+              onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 8))}
+              placeholder={REGISTER.phone.placeholder}
+              inputMode="numeric"
+              autoComplete="tel-local"
+              className="h-14 min-w-0 flex-1 rounded-2xl border-2 border-line bg-white px-4 tracking-wider outline-none focus:border-sea"
+            />
+          </div>
+        </div>
+        <div className="mt-5">
+          <span className={lab}>{REGISTER.who.label}</span>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {REGISTER.who.options.map((o) => (
+              <button
+                key={o}
+                onClick={() => setWho(o)}
+                aria-pressed={who === o}
+                className={`h-11 rounded-full border-2 px-4 text-[clamp(15px,4.23vw,17.5px)] font-bold ${who === o ? 'border-sea bg-sea text-white' : 'border-line bg-white text-ink'}`}
+              >
+                {o}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="mt-5 rounded-2xl border border-line bg-white p-4">
+          <p className="text-[clamp(15.5px,4.36vw,18px)] font-bold text-ink">{REGISTER.consent.title}</p>
+          {REGISTER.consent.lines.map((l) => (
+            <p key={l} className="mt-1 text-[clamp(13.5px,3.85vw,16px)] text-mute">
+              {l}
+            </p>
+          ))}
+          <button onClick={() => setAgree(!agree)} aria-pressed={agree} className="mt-3 flex items-center gap-2">
+            <span className={`grid h-7 w-7 place-items-center rounded-lg border-2 ${agree ? 'border-sea bg-sea text-white' : 'border-[#9cc9da] bg-white'}`}>{agree && <Icon name="check" size={18} />}</span>
+            <span className="text-[clamp(16px,4.5vw,18.5px)] font-bold text-ink">{REGISTER.consent.agree}</span>
+          </button>
+        </div>
+        <BottomBar>
+          {err && <p className="mb-2 text-center text-[clamp(14.5px,4.1vw,17px)] font-bold text-[#c2410c]">{err}</p>}
+          <Button onClick={next}>{REGISTER.next}</Button>
         </BottomBar>
       </Sheet>
     </>
   )
 }
 
-/* ── 06 체험 2종 + 회차 고르기 ─────────────────────── */
-export function HandsOnScreen({ p, update, onNext }: { p: Progress; update: Upd; onNext: () => void }) {
-  const { day, live, hm } = scheduleDay()
-  const [closed, setClosed] = useState<SlotKey[]>([])
-  const [openPick, setOpenPick] = useState<string | null>(null)
-  useEffect(() => {
-    getClosedSlots(day)
-      .then(setClosed)
-      .catch(() => setClosed([]))
-  }, [day])
-
-  const choose = (program: string, time: string | null) => {
-    update((prev) => {
-      const b = { ...prev.bookings }
-      if (time) b[program] = { day, time }
-      else delete b[program]
-      return { bookings: b }
-    })
-    setOpenPick(null)
-  }
-
-  return (
-    <>
-      <Hero eyebrow={HANDSON.eyebrow} title={HANDSON.title} lead={HANDSON.lead} />
-      <Sheet>
-      {!live && <p className="text-[clamp(13.5px,3.85vw,16px)] font-bold text-[#b45309]">행사 기간(11/18~21) 회차표 미리보기 · {dayLabel(day)}</p>}
-
-      <div className="mt-3 flex flex-col gap-3">
-        {HANDSON.programs.map((pr) => {
-          const mine = p.bookings[pr.id]
-          const picking = openPick === pr.id
-          return (
-            <Card key={pr.id} className="p-4">
-              <ImageSlot label={`${pr.name} 사진`} className="h-[150px]">
-                <Icon name={pr.id === 'filter' ? 'filter' : 'energy'} size={44} className="text-white/90" />
-              </ImageSlot>
-              <p className="mt-3.5 text-[19px] font-extrabold">{pr.name}</p>
-              <p className="mt-1 text-[clamp(15.5px,4.36vw,18px)] leading-relaxed text-mute">{pr.desc}</p>
-              <div className="mt-2.5 flex gap-3 text-[clamp(14px,3.97vw,16.5px)] text-mute">
-                <span className="flex items-center gap-1">
-                  <Icon name="people" size={16} /> 회차당 {pr.capacity}명
-                </span>
-                <span className="flex items-center gap-1">
-                  <Icon name="clock" size={16} /> 약 {pr.minutes}분
-                </span>
-              </div>
-
-              {mine && !picking ? (
-                <motion.div initial={{ scale: 0.96, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="mt-4 rounded-2xl border-2 border-dashed border-deep bg-[#eaf6fa] p-4">
-                  <p className="flex items-center gap-1.5 text-[clamp(13.5px,3.85vw,16px)] font-extrabold text-deep">
-                    <Icon name="ticket" size={17} /> {HANDSON.picked}
-                  </p>
-                  <p className="mt-1 text-[22px] font-extrabold">
-                    {dayLabel(mine.day)} {mine.time}
-                  </p>
-                  <p className="mt-1 text-[clamp(13.5px,3.85vw,16px)] text-mute">{HANDSON.ticketNote}</p>
-                  <div className="mt-3 flex gap-2">
-                    <button onClick={() => setOpenPick(pr.id)} className="h-10 flex-1 rounded-xl bg-white text-[clamp(14.5px,4.1vw,17px)] font-semibold text-deep">
-                      {HANDSON.change}
-                    </button>
-                    <button onClick={() => choose(pr.id, null)} className="h-10 rounded-xl px-4 text-[clamp(14.5px,4.1vw,17px)] font-semibold text-mute">
-                      {HANDSON.cancel}
-                    </button>
-                  </div>
-                </motion.div>
-              ) : (
-                <>
-                  {!picking && (
-                    <Button variant="outline" className="mt-4 h-12 text-[clamp(16.5px,4.62vw,19px)]" onClick={() => setOpenPick(pr.id)}>
-                      <Icon name="clock" size={18} /> {HANDSON.pick}
-                    </Button>
-                  )}
-                  <AnimatePresence>
-                    {picking && (
-                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                        <div className="mt-4 grid grid-cols-4 gap-2">
-                          {HANDSON.times.map((t) => {
-                            const isClosed = closed.some((c) => c.program === pr.id && c.time === t)
-                            const isPast = live && t <= hm
-                            const off = isClosed || isPast
-                            return (
-                              <button
-                                key={t}
-                                disabled={off}
-                                onClick={() => choose(pr.id, t)}
-                                className={`flex h-12 flex-col items-center justify-center rounded-xl border text-[clamp(15.5px,4.36vw,18px)] font-extrabold ${
-                                  off ? 'border-transparent bg-[#eef2f3] text-[#a9b6bb]' : mine?.time === t ? 'border-deep bg-deep text-white' : 'border-line bg-white text-ink'
-                                }`}
-                              >
-                                {t}
-                                {off && <span className="text-[clamp(11px,3.21vw,13.5px)] font-semibold">{isClosed ? HANDSON.closed : HANDSON.past}</span>}
-                              </button>
-                            )
-                          })}
-                        </div>
-                        <button onClick={() => setOpenPick(null)} className="mt-2 h-10 w-full text-[clamp(14.5px,4.1vw,17px)] font-semibold text-mute">
-                          닫기
-                        </button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </>
-              )}
-            </Card>
-          )
-        })}
-      </div>
-      <p className="mt-3 text-[clamp(13.5px,3.85vw,16px)] text-mute">{HANDSON.operator}</p>
-
-      <BottomBar>
-        <Button onClick={onNext}>{HANDSON.cta}</Button>
-        {Object.keys(p.bookings).length === 0 && <p className="mt-2 text-center text-[clamp(13.5px,3.85vw,16px)] text-mute">시간을 고르지 않아도 넘어갈 수 있어요</p>}
-      </BottomBar>
-      </Sheet>
-    </>
-  )
-}
-
-/* ── 07 설문 ───────────────────────────────────────── */
+/* ── 참가자 등록 2/2 — 설문 ──────────────────────── */
 export function SurveyScreen({ p, update, onDone }: { p: Progress; update: Upd; onDone: () => void }) {
-  const [page, setPage] = useState(0)
-  const [nick, setNick] = useState(p.nickname)
-  const [ans, setAns] = useState<Record<string, string>>(p.survey ?? {})
+  const [ans, setAns] = useState<Record<string, string | string[] | number>>(p.survey ?? {})
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
-  const qs = SURVEY.pages[page]
 
-  const pageOk = (i: number) => SURVEY.pages[i].every((q) => ans[q.id]) && (i > 0 || nick.trim().length > 0)
+  const set = (id: string, v: string | number, multi = false) => {
+    setAns((a) => {
+      if (!multi) return { ...a, [id]: v }
+      const cur = (a[id] as string[]) ?? []
+      return { ...a, [id]: cur.includes(v as string) ? cur.filter((x) => x !== v) : [...cur, v as string] }
+    })
+  }
+  const filled = (id: string) => {
+    const v = ans[id]
+    return Array.isArray(v) ? v.length > 0 : v !== undefined && v !== ''
+  }
 
-  const next = async () => {
-    if (page === 0 && !nick.trim()) return setErr(SURVEY.needNick)
-    if (!pageOk(page)) return setErr(SURVEY.needAll)
+  const submit = async () => {
+    if (!SURVEY.qs.every((q) => filled(q.id))) return setErr(SURVEY.needAll)
+    if (!p.reg) return
     setErr('')
-    if (page < SURVEY.pages.length - 1) {
-      setPage(page + 1)
-      window.scrollTo({ top: 0 })
-      return
-    }
     setBusy(true)
-    const nickname = nick.trim()
-    update({ nickname, survey: ans })
-    const bookings = Object.fromEntries(Object.entries(p.bookings).map(([k, v]) => [k, `${dayLabel(v.day)} ${v.time}`]))
+    update({ survey: ans })
     try {
-      const r = await submitSurvey({ deviceId: p.deviceId, day: nowKST().day, nickname, answers: ans, bookings })
-      update({ code: r.code, exchanged: r.exchanged, offlineCode: false })
+      const t = await registerTicket({ deviceId: p.deviceId, name: p.reg.name, phone8: p.reg.phone8, who: p.reg.who, survey: ans })
+      update({ ticket: { ...t, offline: false } })
     } catch {
-      // 연결이 끊겨도 막히지 않게 — 임시 번호로 보여 주고 교환 화면에서 다시 보냄
-      update((prev) => ({ code: prev.code ?? `${dayLetter(nowKST().day)}-임시${prev.deviceId.slice(0, 3).toUpperCase()}`, offlineCode: true }))
+      // 연결이 끊겨도 막히지 않게 — 임시 티켓으로 보여 주고 티켓 화면에서 다시 보냄
+      update((prev) => ({ ticket: prev.ticket ?? { no: 0, issuedAt: new Date().toISOString(), usedAt: null, offline: true } }))
     }
     setBusy(false)
     onDone()
@@ -235,93 +351,87 @@ export function SurveyScreen({ p, update, onDone }: { p: Progress; update: Upd; 
 
   return (
     <>
-      <Hero eyebrow={`SURVEY · ${page + 1} / ${SURVEY.pages.length}`} title={SURVEY.title} lead={SURVEY.lead} />
+      <Hero eyebrow={SURVEY.eyebrow} title={SURVEY.title} />
       <Sheet>
-
-      {page === 0 && (
-        <label className="mt-1 block">
-          <span className="text-[clamp(16.5px,4.62vw,19px)] font-extrabold">{SURVEY.nickname.label}</span>
-          <input
-            value={nick}
-            onChange={(e) => setNick(e.target.value.slice(0, SURVEY.nickname.max))}
-            placeholder={SURVEY.nickname.placeholder}
-            autoComplete="off"
-            enterKeyHint="done"
-            className="mt-2 h-14 w-full rounded-2xl border-2 border-line bg-white px-4 outline-none focus:border-deep"
-          />
-          <span className="mt-1 block text-right text-[clamp(12.5px,3.59vw,15px)] text-mute">
-            {nick.length}/{SURVEY.nickname.max}
-          </span>
-        </label>
-      )}
-
-      {qs.map((q) => (
-        <div key={q.id} className="mt-5">
-          <p className="text-[clamp(16.5px,4.62vw,19px)] font-extrabold">{q.label}</p>
-          <div className={`mt-2.5 ${'faces' in q && q.faces ? 'grid grid-cols-4 gap-2' : 'flex flex-wrap gap-2'}`}>
-            {q.options.map((o, oi) => {
-              const on = ans[q.id] === o
-              if ('faces' in q && q.faces)
-                return (
-                  <button
-                    key={o}
-                    onClick={() => setAns({ ...ans, [q.id]: o })}
-                    className={`flex flex-col items-center gap-1 rounded-2xl border-2 py-2.5 text-[clamp(12.5px,3.59vw,15px)] font-semibold leading-tight ${on ? 'border-deep bg-deep text-white' : 'border-line bg-white text-mute'}`}
-                    aria-pressed={on}
-                  >
-                    <Face level={oi} />
-                    {o}
-                  </button>
-                )
-              return (
-                <button
-                  key={o}
-                  onClick={() => setAns({ ...ans, [q.id]: o })}
-                  className={`h-11 rounded-full border-2 px-4 text-[clamp(15.5px,4.36vw,18px)] font-semibold ${on ? 'border-deep bg-deep text-white' : 'border-line bg-white text-ink'}`}
-                  aria-pressed={on}
-                >
-                  {o}
-                </button>
-              )
-            })}
-          </div>
-        </div>
-      ))}
-
-      <BottomBar>
-        {err && <p className="mb-2 text-center text-[clamp(14.5px,4.1vw,17px)] font-semibold text-[#c2410c]">{err}</p>}
-        <Button onClick={next} disabled={busy}>
-          {busy ? '보내는 중…' : page < SURVEY.pages.length - 1 ? SURVEY.next : SURVEY.submit}
-        </Button>
-      </BottomBar>
+        {SURVEY.qs.map((q) => (
+          <Card key={q.id} className="mt-3 p-4 first:mt-0">
+            <p className="text-[clamp(16px,4.5vw,18.5px)] font-bold text-ink">
+              {q.label}
+              {q.kind === 'multi' && <span className="ml-1 text-[clamp(13px,3.72vw,15.5px)] font-medium text-cyan">· {SURVEY.multiNote}</span>}
+            </p>
+            {q.kind === 'scale' ? (
+              <>
+                <div className="mt-3 grid grid-cols-5 gap-1.5">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <button
+                      key={n}
+                      onClick={() => set(q.id, n)}
+                      aria-pressed={ans[q.id] === n}
+                      className={`h-12 rounded-xl text-[18px] font-bold ${ans[q.id] === n ? 'bg-sea text-white' : 'bg-[#eef5f8] text-ink'}`}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-1.5 flex justify-between text-[clamp(12.5px,3.59vw,15px)] text-mute">
+                  <span>{q.low}</span>
+                  <span>{q.high}</span>
+                </div>
+              </>
+            ) : (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {q.options!.map((o) => {
+                  const on = q.kind === 'multi' ? ((ans[q.id] as string[]) ?? []).includes(o) : ans[q.id] === o
+                  return (
+                    <button
+                      key={o}
+                      onClick={() => set(q.id, o, q.kind === 'multi')}
+                      aria-pressed={on}
+                      className={`min-h-11 rounded-full border-2 px-4 py-1.5 text-[clamp(14.5px,4.1vw,17px)] font-bold ${on ? 'border-sea bg-sea text-white' : 'border-line bg-white text-ink'}`}
+                    >
+                      {o}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+          </Card>
+        ))}
+        <BottomBar>
+          {err && <p className="mb-2 text-center text-[clamp(14.5px,4.1vw,17px)] font-bold text-[#c2410c]">{err}</p>}
+          <Button onClick={submit} disabled={busy}>
+            {busy ? '보내는 중…' : SURVEY.submit}
+          </Button>
+        </BottomBar>
       </Sheet>
     </>
   )
 }
 
-/* ── 08 기념품 교환 ────────────────────────────────── */
-export function ExchangeScreen({ p, update, onHome }: { p: Progress; update: Upd; onHome: () => void }) {
+/* ── 선물 교환 티켓 ──────────────────────────────── */
+export function TicketScreen({ p, update, onHome }: { p: Progress; update: Upd; onHome: () => void }) {
   const [pinOpen, setPinOpen] = useState(false)
   const [pin, setPin] = useState('')
   const [msg, setMsg] = useState('')
   const [holding, setHolding] = useState(false)
   const holdT = useRef<number | undefined>(undefined)
+  const t = p.ticket
+  const used = Boolean(t?.usedAt)
 
-  // 화면 열 때 서버 상태 확인 + 임시 번호였다면 다시 보내기
+  // 화면 열 때 서버 상태 확인 + 임시 티켓이면 다시 보내기
   useEffect(() => {
     let alive = true
     ;(async () => {
       try {
-        if (p.offlineCode && p.survey) {
-          const bookings = Object.fromEntries(Object.entries(p.bookings).map(([k, v]) => [k, `${dayLabel(v.day)} ${v.time}`]))
-          const r = await submitSurvey({ deviceId: p.deviceId, day: nowKST().day, nickname: p.nickname, answers: p.survey, bookings })
-          if (alive) update({ code: r.code, exchanged: r.exchanged, offlineCode: false })
+        if (p.ticket?.offline && p.reg && p.survey) {
+          const r = await registerTicket({ deviceId: p.deviceId, name: p.reg.name, phone8: p.reg.phone8, who: p.reg.who, survey: p.survey })
+          if (alive) update({ ticket: { ...r, offline: false } })
         } else {
-          const r = await getStatus(p.deviceId)
-          if (alive && r.code) update({ code: r.code, exchanged: r.exchanged })
+          const r = await getTicket(p.deviceId)
+          if (alive && r) update({ ticket: { ...r, offline: false } })
         }
       } catch {
-        /* 연결 실패 — 그대로 둠 */
+        /* 연결 실패 — 그대로 */
       }
     })()
     return () => {
@@ -342,120 +452,104 @@ export function ExchangeScreen({ p, update, onHome }: { p: Progress; update: Upd
     setHolding(false)
     window.clearTimeout(holdT.current)
   }
-
   const confirm = async () => {
-    setMsg('')
     try {
-      const r = await staffExchange(pin, { deviceId: p.deviceId })
+      const r = await staffUse(pin, { deviceId: p.deviceId })
       if (r === 'ok' || r === 'already') {
-        update({ exchanged: true })
+        const now = await getTicket(p.deviceId).catch(() => null)
+        update((prev) => ({ ticket: prev.ticket ? { ...prev.ticket, usedAt: now?.usedAt ?? new Date().toISOString() } : prev.ticket }))
         setPinOpen(false)
       } else if (r === 'badpin') setMsg('스태프 번호가 맞지 않아요')
-      else setMsg('설문 기록을 찾지 못했어요. 연결 상태를 확인해 주세요')
+      else setMsg('티켓 기록을 찾지 못했어요. 연결 상태를 확인해 주세요')
     } catch {
       setMsg('연결이 불안정해요. 잠시 후 다시 눌러 주세요')
     }
   }
 
-  const bookings = Object.entries(p.bookings)
+  const phone = p.reg ? `010-****-${p.reg.phone8.slice(4)}` : '-'
+  const no = t && t.no > 0 ? `No. ${String(t.no).padStart(4, '0')}` : '임시'
+  const field = (k: string, v: string) => (
+    <div>
+      <p className="text-[clamp(12.5px,3.59vw,15px)] text-mute">{k}</p>
+      <p className="text-[clamp(16px,4.5vw,18.5px)] font-bold text-ink">{v}</p>
+    </div>
+  )
   return (
     <>
-      <div className="relative">
-        <Hero eyebrow={`${p.nickname || '맑은 물방울'} 님`} title={[p.exchanged ? EXCHANGE.done : EXCHANGE.title]} center />
-        <motion.div className="absolute right-0 top-2" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', delay: 0.3 }}>
-          <Character level={3} size={76} bob />
-        </motion.div>
-      </div>
+      <Hero eyebrow={TICKET.eyebrow} title={used ? TICKET.doneTitle : TICKET.title} lead={used ? TICKET.doneLead : TICKET.lead} />
       <Sheet>
-      <div className="flex justify-center gap-3">
-        {STAMPS.map((s, i) => (
-          <div
-            key={s}
-            className={`flex h-[78px] w-[78px] flex-col items-center justify-center rounded-full border-[3px] text-[clamp(14px,3.97vw,16.5px)] font-extrabold leading-tight ${
-              p.solved[i] ? 'border-sea bg-lime text-sea shadow-[0_4px_0_#0b4a75]' : 'border-dashed border-[#c5d2d7] text-[#9fb0b7]'
-            }`}
-          >
-            {s.split(' ').map((w) => (
-              <span key={w} className="block">
-                {w}
-              </span>
-            ))}
+        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="relative overflow-hidden rounded-3xl shadow-[0_14px_34px_-16px_rgba(8,60,100,0.5)]">
+          <div className={`relative px-5 pt-5 pb-6 text-center text-white ${used ? 'bg-[#a9b8c0]' : 'bg-[linear-gradient(150deg,#13b67a,#0e9f6e)]'}`}>
+            <div className="flex items-center justify-between">
+              <span className="text-[13px] font-bold tracking-[0.25em] text-white/85">{TICKET.label}</span>
+              <span className="rounded-full bg-white/25 px-2.5 py-0.5 text-[13px] font-bold">{used ? TICKET.used : `● ${TICKET.ok}`}</span>
+            </div>
+            <Icon name="gift" size={58} className="mx-auto mt-3" />
+            <p className={`mt-2 text-[clamp(25px,7vw,30px)] font-bold ${used ? 'line-through decoration-2' : ''}`}>{TICKET.name}</p>
+            <p className={`${t15} mt-1 text-white/90`}>{TICKET.what}</p>
+            {t && t.no > 0 && <span className="mt-3 inline-block rounded-full bg-white/20 px-3 py-1 text-[clamp(14px,3.97vw,16.5px)] font-bold">{TICKET.order(t.no)}</span>}
+            <AnimatePresence>
+              {used && (
+                <motion.span
+                  initial={{ scale: 2.2, opacity: 0, rotate: -24 }}
+                  animate={{ scale: 1, opacity: 1, rotate: -12 }}
+                  transition={{ type: 'spring', stiffness: 220, damping: 14 }}
+                  className="absolute top-[38%] left-1/2 -translate-x-1/2 rounded-2xl border-[5px] border-[#e5323b] bg-white/90 px-4 py-1 text-[clamp(26px,7.5vw,32px)] font-bold text-[#e5323b]"
+                >
+                  {TICKET.paid}
+                </motion.span>
+              )}
+            </AnimatePresence>
           </div>
-        ))}
-      </div>
+          <div className="relative grid grid-cols-2 gap-x-4 gap-y-3 border-t-2 border-dashed border-line bg-white px-5 py-4">
+            <span className="absolute -top-3 -left-3 h-6 w-6 rounded-full bg-[var(--sheet)]" />
+            <span className="absolute -top-3 -right-3 h-6 w-6 rounded-full bg-[var(--sheet)]" />
+            {field(TICKET.fName, p.reg?.name ?? '-')}
+            {field(TICKET.fPhone, phone)}
+            {field(TICKET.fNo, no)}
+            {field(used ? TICKET.fUsed : TICKET.fIssued, t ? stampLabel(used ? t.usedAt! : t.issuedAt) : '-')}
+          </div>
+        </motion.div>
+        {t?.offline && <p className="mt-3 text-center text-[clamp(14px,3.97vw,16.5px)] text-[#b45309]">{TICKET.offline}</p>}
 
-      <div className="relative mt-5 rounded-3xl border border-line bg-white p-5 text-center">
-        <p className="flex items-center justify-center gap-1.5 text-[clamp(13.5px,3.85vw,16px)] font-extrabold text-mute">
-          <Icon name="gift" size={16} /> {EXCHANGE.giftLabel}
-        </p>
-        <p className="mt-1 text-[clamp(17.5px,4.87vw,20px)] font-extrabold">{EXCHANGE.giftName}</p>
-        <div className="my-4 border-t border-dashed border-line" />
-        <p className="text-[clamp(15.5px,4.36vw,18px)] font-extrabold">{EXCHANGE.show}</p>
-        <p className="mt-1 text-[clamp(13px,3.72vw,15.5px)] font-semibold text-mute">{EXCHANGE.codeLabel}</p>
-        <p className={`mt-1 font-mono text-[46px] font-extrabold tracking-[0.12em] ${p.exchanged ? 'text-[#b6c3c8] line-through decoration-4' : 'text-ink'}`}>{p.code ?? '----'}</p>
-        {p.offlineCode && <p className="mt-1 text-[clamp(13.5px,3.85vw,16px)] text-[#9a5b00]">{EXCHANGE.offline}</p>}
-        <AnimatePresence>
-          {p.exchanged && (
-            <motion.div
-              initial={{ scale: 2, opacity: 0, rotate: -20 }}
-              animate={{ scale: 1, opacity: 1, rotate: -10 }}
-              transition={{ type: 'spring', stiffness: 220, damping: 15 }}
-              className="pointer-events-none absolute right-4 bottom-6 rounded-xl border-4 border-eco px-3 py-1 text-[22px] font-extrabold text-eco"
-            >
-              {EXCHANGE.done}
-            </motion.div>
+        <BottomBar>
+          {used ? (
+            <>
+              <button disabled className="h-[56px] w-full rounded-2xl bg-[#dfe7eb] text-[clamp(17px,4.8vw,19.5px)] font-bold text-[#8aa1ad]">
+                {TICKET.usedBtn}
+              </button>
+              <Button onClick={onHome} className="mt-2">
+                {TICKET.home}
+              </Button>
+            </>
+          ) : (
+            <>
+              <p className="mb-2 text-center text-[clamp(13px,3.72vw,15.5px)] text-mute">{TICKET.staffNote}</p>
+              <button
+                onPointerDown={startHold}
+                onPointerUp={endHold}
+                onPointerLeave={endHold}
+                onPointerCancel={endHold}
+                onContextMenu={(e) => e.preventDefault()}
+                className="relative h-[56px] w-full select-none overflow-hidden rounded-2xl bg-sea text-[clamp(17px,4.8vw,19.5px)] font-bold text-white"
+              >
+                <span className="absolute inset-y-0 left-0 bg-white/25" style={{ width: holding ? '100%' : '0%', transition: holding ? 'width 0.9s linear' : 'none' }} />
+                <span className="relative">{holding ? '길게 눌러 주세요…' : TICKET.staffBtn}</span>
+              </button>
+              <button onClick={onHome} className="mt-1 h-11 w-full text-[clamp(14.5px,4.1vw,17px)] font-bold text-mute underline underline-offset-4">
+                {TICKET.home}
+              </button>
+            </>
           )}
-        </AnimatePresence>
-      </div>
-      {p.exchanged && <p className="mt-3 text-center text-[clamp(15px,4.23vw,17.5px)] text-mute">{EXCHANGE.doneSub}</p>}
-
-      {bookings.length > 0 && (
-        <div className="mt-4 rounded-3xl border-2 border-dashed border-deep bg-[#eaf6fa] p-4">
-          <p className="flex items-center gap-1.5 text-[clamp(13.5px,3.85vw,16px)] font-extrabold text-deep">
-            <Icon name="ticket" size={17} /> {EXCHANGE.ticket}
-          </p>
-          {bookings.map(([id, b]) => (
-            <p key={id} className="mt-1.5 flex justify-between text-[clamp(16.5px,4.62vw,19px)] font-extrabold">
-              <span>{HANDSON.programs.find((x) => x.id === id)?.name}</span>
-              <span>
-                {dayLabel(b.day)} {b.time}
-              </span>
-            </p>
-          ))}
-        </div>
-      )}
-
-      <BottomBar>
-        {!p.exchanged && (
-          <button
-            onPointerDown={startHold}
-            onPointerUp={endHold}
-            onPointerLeave={endHold}
-            onPointerCancel={endHold}
-            onContextMenu={(e) => e.preventDefault()}
-            className="relative h-14 w-full select-none overflow-hidden rounded-2xl border-2 border-deep bg-white text-[clamp(16.5px,4.62vw,19px)] font-extrabold text-deep"
-          >
-            <span className="absolute inset-y-0 left-0 bg-[#d6eef6]" style={{ width: holding ? '100%' : '0%', transition: holding ? 'width 0.9s linear' : 'none' }} />
-            <span className="relative">{holding ? EXCHANGE.staffHold : EXCHANGE.staffBtn}</span>
-          </button>
-        )}
-        {/* 처음 화면으로 — 스탬프·교환 기록은 그대로(중복 수령 방지) */}
-        {p.exchanged ? (
-          <Button onClick={onHome}>{EXCHANGE.home}</Button>
-        ) : (
-          <button onClick={onHome} className="mt-1 h-11 w-full text-[clamp(14.5px,4.1vw,17px)] font-bold text-mute underline underline-offset-4">
-            {EXCHANGE.home}
-          </button>
-        )}
-      </BottomBar>
+        </BottomBar>
       </Sheet>
 
       <AnimatePresence>
         {pinOpen && (
           <motion.div className="fixed inset-0 z-50 grid place-items-center bg-black/40 px-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="w-full max-w-[360px] rounded-3xl bg-white p-6">
-              <p className="text-[20px] font-extrabold">{EXCHANGE.pinTitle}</p>
-              <p className="mt-1 text-[clamp(15px,4.23vw,17.5px)] text-mute">{EXCHANGE.pinLead}</p>
+              <p className="text-[clamp(20px,5.6vw,24px)] font-bold">{TICKET.pinTitle}</p>
+              <p className={`${t15} mt-1 text-mute`}>{TICKET.pinLead}</p>
               <input
                 value={pin}
                 onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
@@ -463,15 +557,15 @@ export function ExchangeScreen({ p, update, onHome }: { p: Progress; update: Upd
                 type="password"
                 autoFocus
                 autoComplete="off"
-                className="mt-4 h-14 w-full rounded-2xl border-2 border-line text-center text-[24px] tracking-[0.5em] outline-none focus:border-deep"
+                className="mt-4 h-14 w-full rounded-2xl border-2 border-line text-center text-[24px] tracking-[0.5em] outline-none focus:border-sea"
               />
-              {msg && <p className="mt-2 text-[clamp(14.5px,4.1vw,17px)] font-semibold text-[#c2410c]">{msg}</p>}
+              {msg && <p className="mt-2 text-[clamp(14.5px,4.1vw,17px)] font-bold text-[#c2410c]">{msg}</p>}
               <div className="mt-4 flex gap-2">
-                <button onClick={() => setPinOpen(false)} className="h-12 flex-1 rounded-2xl bg-[#eef2f3] font-extrabold text-mute">
+                <button onClick={() => setPinOpen(false)} className="h-12 flex-1 rounded-2xl bg-[#eef2f3] font-bold text-mute">
                   취소
                 </button>
-                <button onClick={confirm} disabled={pin.length < 4} className="h-12 flex-1 rounded-2xl bg-deep font-extrabold text-white disabled:bg-[#b9c7cd]">
-                  교환 완료 처리
+                <button onClick={confirm} disabled={pin.length < 4} className="h-12 flex-1 rounded-2xl bg-sea font-bold text-white disabled:bg-[#b9c7cd]">
+                  지급 완료
                 </button>
               </div>
             </motion.div>

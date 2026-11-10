@@ -6,7 +6,6 @@ import { STEPS } from '../lib/progress'
 import { SeaBackground } from '../components/ui'
 import hero from '../assets/img/hero.webp'
 import heroLoop from '../assets/img/hero-loop.mp4'
-import { Icon } from '../components/Icons'
 
 /** 그림 가장자리를 배경 물빛에 녹여 네모 테두리가 안 보이게 */
 /** 하늘(투명) → 맑은 물 → 깊은 물, 중간에 단단한 경계 없이 */
@@ -115,7 +114,7 @@ export function IntroScreen({ p, go, restart }: { p: Progress; go: (s: Step) => 
                 transition={{ delay: 1.3, type: 'spring', stiffness: 260, damping: 15 }}
                 className="absolute left-[52%] top-[37%] w-max rounded-2xl rounded-bl-sm bg-white px-3 py-1.5 text-[clamp(14px,3.97vw,16.5px)] font-bold text-sea shadow-[0_6px_16px_rgba(8,60,100,0.2)]"
               >
-                나 좀 맑게 해 줄래?
+                {INTRO.bubble}
               </motion.div>
             </div>
           </motion.div>
@@ -124,17 +123,11 @@ export function IntroScreen({ p, go, restart }: { p: Progress; go: (s: Step) => 
         {/* ── 물웅덩이 + 시작 버튼 ── */}
         <div className="relative shrink-0 px-5 pt-[min(36px,4.5vh)] pb-[max(min(84px,7.5vh),calc(env(safe-area-inset-bottom)+16px))]">
           <motion.div className="relative flex flex-col gap-2" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}>
-            <div className="mb-[min(12px,1.4vh)] flex justify-center gap-2 text-[clamp(14.5px,4.1vw,17px)] font-bold text-white">
-              <span className="flex items-center gap-1 whitespace-nowrap rounded-full bg-white/20 px-3 py-1.5 ring-1 ring-white/45">
-                <Icon name="clock" size={15} /> {INTRO.chips[0]}
-              </span>
-              <span className="flex items-center gap-1 whitespace-nowrap rounded-full bg-white/20 px-3 py-1.5 ring-1 ring-white/45">
-                <Icon name="water" size={15} /> {INTRO.chips[1]}
-              </span>
-              <span className="flex items-center gap-1 whitespace-nowrap rounded-full bg-white/20 px-3 py-1.5 ring-1 ring-white/45">
-                <Icon name="gift" size={15} /> {INTRO.chips[2]}
-              </span>
-            </div>
+            <p className="mb-[min(14px,1.7vh)] text-center text-[clamp(16px,2.3vh,19px)] font-bold leading-snug text-white [text-shadow:0_2px_8px_rgba(8,60,100,0.45)]">
+              {INTRO.lead[0]}
+              <br />
+              {INTRO.lead[1]}
+            </p>
             {resumable ? (
               <>
                 <button onClick={() => go(resumeTo)} className="cta breathe h-[clamp(50px,7.6vh,64px)] w-full rounded-2xl text-[clamp(17px,2.5vh,20px)] font-bold">
@@ -145,7 +138,7 @@ export function IntroScreen({ p, go, restart }: { p: Progress; go: (s: Step) => 
                 </button>
               </>
             ) : (
-              <button onClick={() => go('about')} className="cta breathe h-[clamp(50px,7.6vh,64px)] w-full rounded-2xl text-[clamp(17px,2.5vh,20px)] font-bold">
+              <button onClick={() => go('howto')} className="cta breathe h-[clamp(50px,7.6vh,64px)] w-full rounded-2xl text-[clamp(17px,2.5vh,20px)] font-bold">
                 {INTRO.cta}
               </button>
             )}

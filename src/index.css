@@ -396,6 +396,19 @@ button {
   }
 }
 
+/* QR 스캐너 훑는 선 */
+.scan-line {
+  animation: scan-line 2.2s ease-in-out infinite alternate;
+}
+@keyframes scan-line {
+  from {
+    top: 4%;
+  }
+  to {
+    top: 94%;
+  }
+}
+
 /* 섬 둥실 */
 .float-slow {
   animation: float-slow 5s ease-in-out infinite;

@@ -1,36 +1,28 @@
--- 에코업 도슨트 투어 서버 (Supabase 무료 요금제)
+-- 에코업 도슨트 투어 서버 (Supabase 무료 요금제) — 시안 v2(2026-11): 참가자 등록 + 선물 교환 티켓
 -- 표는 RLS 로 잠그고(정책 없음 = anon 접근 불가), 아래 함수만 anon 에 엽니다.
--- 스태프 번호는 docent_config 에 해시로 저장: select docent_set_pin('1234');  (SQL 편집기에서 한 번)
+-- 스태프 번호 설정: select docent_set_pin('1234');  (SQL 편집기에서 한 번, 관리자만)
+-- 개인정보(이름·휴대폰)는 선물 지급 확인·결과 보고용, 행사 종료 후 파기: truncate docent_participants;
 
 create extension if not exists pgcrypto;
 
-create table if not exists docent_responses (
-  id bigserial primary key,
-  device_id text not null unique,          -- 휴대폰마다 무작위로 만든 기기 번호(개인정보 아님)
-  day date not null,
-  code text not null unique,               -- 교환 번호 A-0001 (날짜 글자 + 그날 순번)
-  nickname text not null default '',
-  who text, understand text, best text, career text, came text,
-  booking_filter text, booking_led text,
-  created_at timestamptz not null default now(),
-  exchanged_at timestamptz
-);
-
-create table if not exists docent_slots (
-  program text not null,
-  day date not null,
-  time text not null,
-  closed boolean not null default true,
-  primary key (program, day, time)
+create table if not exists docent_participants (
+  no serial primary key,                    -- 티켓 번호 = 투어 완주 순번
+  device_id text not null unique,           -- 휴대폰마다 무작위로 만든 기기 번호
+  name text not null,
+  phone text not null,                      -- 010 뒤 8자리
+  who text not null,
+  sat int, understand int,
+  best text, fun text, career text,
+  consent_at timestamptz not null default now(),
+  issued_at timestamptz not null default now(),
+  used_at timestamptz
 );
 
 create table if not exists docent_config (key text primary key, value text not null);
 
-alter table docent_responses enable row level security;
-alter table docent_slots enable row level security;
+alter table docent_participants enable row level security;
 alter table docent_config enable row level security;
 
--- 스태프 번호 설정(관리자가 SQL 편집기에서 실행)
 create or replace function docent_set_pin(p_pin text) returns void
 language sql security definer set search_path = public, extensions as $$
   insert into docent_config(key, value) values ('staff_pin', crypt(p_pin, gen_salt('bf')))
@@ -44,45 +36,31 @@ language sql stable security definer set search_path = public, extensions as $$
 $$;
 revoke all on function docent_pin_ok(text) from public, anon, authenticated;
 
--- 날짜 → 교환 번호 앞글자
-create or replace function docent_letter(p_day date) returns text
-language sql immutable as $$
-  select case p_day when date '2026-11-18' then 'A' when date '2026-11-19' then 'B'
-                    when date '2026-11-20' then 'C' when date '2026-11-21' then 'D' else 'T' end;
-$$;
-
 /* ── 참가자 ── */
 
--- 설문 제출: 같은 기기는 처음 받은 번호를 그대로 돌려줌(닉네임을 바꿔도 같은 번호)
-create or replace function docent_submit(p_device text, p_day date, p_nickname text, p_answers jsonb, p_bookings jsonb)
-returns table(code text, exchanged boolean)
+-- 등록+설문 → 티켓. 같은 기기는 처음 받은 티켓 그대로(중복 발급 방지)
+create or replace function docent_register(p_device text, p_name text, p_phone text, p_who text, p_survey jsonb)
+returns table(no int, issued_at timestamptz, used_at timestamptz)
 language plpgsql security definer set search_path = public as $$
-declare v_code text; v_seq int;
 begin
   if length(coalesce(p_device, '')) < 16 then raise exception 'bad device'; end if;
-  select r.code into v_code from docent_responses r where r.device_id = p_device;
-  if v_code is null then
-    perform pg_advisory_xact_lock(hashtext('docent_seq_' || p_day::text));
-    select count(*) + 1 into v_seq from docent_responses r where r.day = p_day;
-    v_code := docent_letter(p_day) || '-' || lpad(v_seq::text, 4, '0');
-    insert into docent_responses(device_id, day, code, nickname, who, understand, best, career, came, booking_filter, booking_led)
-    values (p_device, p_day, v_code, left(coalesce(p_nickname, ''), 12),
-            p_answers->>'who', p_answers->>'understand', p_answers->>'best', p_answers->>'career', p_answers->>'came',
-            p_bookings->>'filter', p_bookings->>'led');
-  end if;
-  return query select r.code, r.exchanged_at is not null from docent_responses r where r.device_id = p_device;
+  if p_phone !~ '^[0-9]{8}$' then raise exception 'bad phone'; end if;
+  insert into docent_participants(device_id, name, phone, who, sat, understand, best, fun, career)
+  values (
+    p_device, left(trim(p_name), 20), p_phone, left(p_who, 20),
+    nullif(p_survey->>'sat', '')::int, nullif(p_survey->>'understand', '')::int,
+    (select string_agg(x, ', ') from jsonb_array_elements_text(coalesce(p_survey->'best', '[]')) x),
+    (select string_agg(x, ', ') from jsonb_array_elements_text(coalesce(p_survey->'fun', '[]')) x),
+    p_survey->>'career'
+  )
+  on conflict (device_id) do nothing;
+  return query select d.no, d.issued_at, d.used_at from docent_participants d where d.device_id = p_device;
 end $$;
 
-create or replace function docent_status(p_device text)
-returns table(code text, exchanged boolean)
+create or replace function docent_ticket(p_device text)
+returns table(no int, issued_at timestamptz, used_at timestamptz)
 language sql stable security definer set search_path = public as $$
-  select r.code, r.exchanged_at is not null from docent_responses r where r.device_id = p_device;
-$$;
-
-create or replace function docent_closed_slots(p_day date)
-returns table(program text, day date, "time" text)
-language sql stable security definer set search_path = public as $$
-  select s.program, s.day, s.time from docent_slots s where s.day = p_day and s.closed;
+  select d.no, d.issued_at, d.used_at from docent_participants d where d.device_id = p_device;
 $$;
 
 /* ── 스태프 ── */
@@ -90,41 +68,27 @@ $$;
 create or replace function docent_staff_pin(p_pin text) returns boolean
 language sql stable security definer set search_path = public as $$ select docent_pin_ok(p_pin); $$;
 
-create or replace function docent_staff_exchange(p_pin text, p_code text, p_device text) returns text
+create or replace function docent_staff_use(p_pin text, p_device text, p_no int) returns text
 language plpgsql security definer set search_path = public as $$
-declare v_id bigint; v_done timestamptz;
+declare v_no int; v_used timestamptz;
 begin
   if not docent_pin_ok(p_pin) then return 'badpin'; end if;
-  select id, exchanged_at into v_id, v_done from docent_responses
-   where (p_device is not null and device_id = p_device) or (p_device is null and upper(code) = upper(p_code))
+  select d.no, d.used_at into v_no, v_used from docent_participants d
+   where (p_device is not null and d.device_id = p_device) or (p_device is null and d.no = p_no)
    for update;
-  if v_id is null then return 'notfound'; end if;
-  if v_done is not null then return 'already'; end if;
-  update docent_responses set exchanged_at = now() where id = v_id;
+  if v_no is null then return 'notfound'; end if;
+  if v_used is not null then return 'already'; end if;
+  update docent_participants set used_at = now() where no = v_no;
   return 'ok';
 end $$;
 
-create or replace function docent_staff_set_slot(p_pin text, p_program text, p_day date, p_time text, p_closed boolean) returns boolean
-language plpgsql security definer set search_path = public as $$
-begin
-  if not docent_pin_ok(p_pin) then return false; end if;
-  if p_closed then
-    insert into docent_slots(program, day, time, closed) values (p_program, p_day, p_time, true)
-    on conflict (program, day, time) do update set closed = true;
-  else
-    delete from docent_slots where program = p_program and day = p_day and time = p_time;
-  end if;
-  return true;
-end $$;
-
-create or replace function docent_staff_responses(p_pin text)
+create or replace function docent_staff_list(p_pin text)
 returns setof jsonb
 language plpgsql stable security definer set search_path = public as $$
 begin
   if not docent_pin_ok(p_pin) then return; end if;
-  return query select to_jsonb(r) - 'device_id' - 'id' from docent_responses r order by r.id;
+  return query select to_jsonb(d) - 'device_id' - 'consent_at' from docent_participants d order by d.no;
 end $$;
 
-grant execute on function docent_submit(text, date, text, jsonb, jsonb), docent_status(text), docent_closed_slots(date),
-  docent_staff_pin(text), docent_staff_exchange(text, text, text), docent_staff_set_slot(text, text, date, text, boolean),
-  docent_staff_responses(text) to anon;
+grant execute on function docent_register(text, text, text, text, jsonb), docent_ticket(text),
+  docent_staff_pin(text), docent_staff_use(text, text, int), docent_staff_list(text) to anon;

@@ -4,33 +4,31 @@
     없으면 이 브라우저 안에 흉내 DB(localStorage)를 둡니다(시안·로컬 확인용).
   - 서버 쪽은 표에 직접 손대지 못하게 막고(RLS), 아래 함수(RPC)만 열어 둡니다.
     스태프 기능은 함수 안에서 스태프 번호를 검사합니다 → supabase/schema.sql
-  - 참가자에게서 받는 것: 기기 번호(무작위), 닉네임, 설문 답, 고른 체험 회차. 이름·연락처 없음.
+  - 참가자에게서 받는 것: 이름·휴대폰 번호·구분(개인정보 수집·이용 동의 후), 설문 답, 기기 번호(무작위).
+    목적은 선물 지급 확인·결과 보고, 행사 종료 후 파기.
 */
-import { EVENT } from '../content/tour'
 
-export type SubmitIn = {
+export type RegIn = {
   deviceId: string
-  day: string
-  nickname: string
-  answers: Record<string, string>
-  bookings: Record<string, string> // 체험 id → 회차 시각
-}
-export type Status = { code: string | null; exchanged: boolean }
-export type ExchangeResult = 'ok' | 'already' | 'notfound' | 'badpin'
-export type SlotKey = { program: string; day: string; time: string }
-export type ResponseRow = {
-  code: string
-  day: string
-  nickname: string
+  name: string
+  phone8: string // 010 뒤 8자리
   who: string
-  understand: string
+  survey: Record<string, string | string[] | number>
+}
+export type TicketOut = { no: number; issuedAt: string; usedAt: string | null }
+export type UseResult = 'ok' | 'already' | 'notfound' | 'badpin'
+export type ParticipantRow = {
+  no: number
+  name: string
+  phone: string
+  who: string
+  sat: number | null
+  understand: number | null
   best: string
+  fun: string
   career: string
-  came: string
-  booking_filter: string
-  booking_led: string
-  created_at: string
-  exchanged_at: string | null
+  issued_at: string
+  used_at: string | null
 }
 
 const URL_ = import.meta.env.VITE_SUPABASE_URL as string | undefined
@@ -54,144 +52,97 @@ async function rpc<T>(fn: string, args: Record<string, unknown>, timeoutMs = 800
   }
 }
 
-/** 행사 날짜별 교환 번호 앞글자: 11/18=A … 11/21=D, 그 밖의 날(시험)=T */
-export function dayLetter(day: string) {
-  const i = EVENT.days.indexOf(day)
-  return i >= 0 ? 'ABCD'[i] : 'T'
-}
-
 /* ── 흉내 DB (서버 없을 때) ─────────────────────────────── */
-const LOCAL_KEY = 'ecoup-docent-localdb'
+const LOCAL_KEY = 'ecoup-docent-localdb-v2'
 const LOCAL_PIN = '0000'
-type LocalDB = { rows: (ResponseRow & { device_id: string })[]; closed: string[] }
-function ldb(): LocalDB {
+type LocalRow = ParticipantRow & { device_id: string }
+function ldb(): LocalRow[] {
   try {
-    const raw = localStorage.getItem(LOCAL_KEY)
-    if (raw) return JSON.parse(raw)
+    return JSON.parse(localStorage.getItem(LOCAL_KEY) ?? '[]')
   } catch {
-    /* */
+    return []
   }
-  return { rows: [], closed: [] }
 }
-function lsave(db: LocalDB) {
+function lsave(rows: LocalRow[]) {
   try {
-    localStorage.setItem(LOCAL_KEY, JSON.stringify(db))
+    localStorage.setItem(LOCAL_KEY, JSON.stringify(rows))
   } catch {
     /* */
   }
 }
-const slotId = (s: SlotKey) => `${s.program}|${s.day}|${s.time}`
+const toTicket = (r: { no: number; issued_at: string; used_at: string | null }): TicketOut => ({ no: r.no, issuedAt: r.issued_at, usedAt: r.used_at })
+const joinArr = (v: unknown) => (Array.isArray(v) ? v.join(', ') : String(v ?? ''))
 
-/* ── 참가자용 ───────────────────────────────────────────── */
+/* ── 참가자 ─────────────────────────────────────────── */
 
-/** 설문 제출 → 교환 번호. 같은 기기가 다시 내면 처음 받은 번호를 그대로 돌려줍니다. */
-export async function submitSurvey(i: SubmitIn): Promise<Status> {
+/** 등록+설문 → 선물 교환 티켓. 같은 기기가 다시 내면 처음 받은 티켓을 그대로 돌려줌 */
+export async function registerTicket(i: RegIn): Promise<TicketOut> {
   if (SERVER_MODE) {
-    const r = await rpc<{ code: string; exchanged: boolean }[]>('docent_submit', {
+    const r = await rpc<{ no: number; issued_at: string; used_at: string | null }[]>('docent_register', {
       p_device: i.deviceId,
-      p_day: i.day,
-      p_nickname: i.nickname,
-      p_answers: i.answers,
-      p_bookings: i.bookings,
+      p_name: i.name,
+      p_phone: i.phone8,
+      p_who: i.who,
+      p_survey: i.survey,
     })
-    return { code: r[0]?.code ?? null, exchanged: Boolean(r[0]?.exchanged) }
+    return toTicket(r[0])
   }
-  const db = ldb()
-  const hit = db.rows.find((r) => r.device_id === i.deviceId)
-  if (hit) return { code: hit.code, exchanged: Boolean(hit.exchanged_at) }
-  const seq = db.rows.filter((r) => r.day === i.day).length + 1
-  const code = `${dayLetter(i.day)}-${String(seq).padStart(4, '0')}`
-  db.rows.push({
+  const rows = ldb()
+  const hit = rows.find((r) => r.device_id === i.deviceId)
+  if (hit) return toTicket(hit)
+  const row: LocalRow = {
     device_id: i.deviceId,
-    code,
-    day: i.day,
-    nickname: i.nickname,
-    who: i.answers.who ?? '',
-    understand: i.answers.understand ?? '',
-    best: i.answers.best ?? '',
-    career: i.answers.career ?? '',
-    came: i.answers.came ?? '',
-    booking_filter: i.bookings.filter ?? '',
-    booking_led: i.bookings.led ?? '',
-    created_at: new Date().toISOString(),
-    exchanged_at: null,
-  })
-  lsave(db)
-  return { code, exchanged: false }
-}
-
-/** 이 기기의 교환 상태(다른 스태프가 처리했을 수도 있으니 화면 열 때마다 확인) */
-export async function getStatus(deviceId: string): Promise<Status> {
-  if (SERVER_MODE) {
-    const r = await rpc<{ code: string; exchanged: boolean }[]>('docent_status', { p_device: deviceId })
-    return { code: r[0]?.code ?? null, exchanged: Boolean(r[0]?.exchanged) }
+    no: rows.length + 1,
+    name: i.name,
+    phone: i.phone8,
+    who: i.who,
+    sat: Number(i.survey.sat) || null,
+    understand: Number(i.survey.understand) || null,
+    best: joinArr(i.survey.best),
+    fun: joinArr(i.survey.fun),
+    career: joinArr(i.survey.career),
+    issued_at: new Date().toISOString(),
+    used_at: null,
   }
-  const hit = ldb().rows.find((r) => r.device_id === deviceId)
-  return { code: hit?.code ?? null, exchanged: Boolean(hit?.exchanged_at) }
+  rows.push(row)
+  lsave(rows)
+  return toTicket(row)
 }
 
-/** 오늘 마감된 회차 */
-export async function getClosedSlots(day: string): Promise<SlotKey[]> {
+/** 이 기기 티켓의 현재 상태(스태프가 지급 처리했는지) */
+export async function getTicket(deviceId: string): Promise<TicketOut | null> {
   if (SERVER_MODE) {
-    return rpc<SlotKey[]>('docent_closed_slots', { p_day: day }, 5000)
+    const r = await rpc<{ no: number; issued_at: string; used_at: string | null }[]>('docent_ticket', { p_device: deviceId })
+    return r[0] ? toTicket(r[0]) : null
   }
-  return ldb()
-    .closed.map((s) => {
-      const [program, d, time] = s.split('|')
-      return { program, day: d, time }
-    })
-    .filter((s) => s.day === day)
+  const hit = ldb().find((r) => r.device_id === deviceId)
+  return hit ? toTicket(hit) : null
 }
 
-/* ── 스태프용 ───────────────────────────────────────────── */
+/* ── 스태프 ─────────────────────────────────────────── */
 
 export async function staffCheckPin(pin: string): Promise<boolean> {
   if (SERVER_MODE) return rpc<boolean>('docent_staff_pin', { p_pin: pin })
   return pin === LOCAL_PIN
 }
 
-/** 교환 처리 — 교환 번호 또는 기기 번호로 */
-export async function staffExchange(pin: string, by: { code?: string; deviceId?: string }): Promise<ExchangeResult> {
+/** 선물 지급 완료 처리 — 기기 번호(참가자 화면) 또는 티켓 번호(스태프 화면) */
+export async function staffUse(pin: string, by: { deviceId?: string; no?: number }): Promise<UseResult> {
   if (SERVER_MODE) {
-    return rpc<ExchangeResult>('docent_staff_exchange', {
-      p_pin: pin,
-      p_code: by.code ?? null,
-      p_device: by.deviceId ?? null,
-    })
+    return rpc<UseResult>('docent_staff_use', { p_pin: pin, p_device: by.deviceId ?? null, p_no: by.no ?? null })
   }
   if (pin !== LOCAL_PIN) return 'badpin'
-  const db = ldb()
-  const hit = db.rows.find((r) =>
-    by.deviceId ? r.device_id === by.deviceId : r.code.toUpperCase() === (by.code ?? '').toUpperCase(),
-  )
+  const rows = ldb()
+  const hit = rows.find((r) => (by.deviceId ? r.device_id === by.deviceId : r.no === by.no))
   if (!hit) return 'notfound'
-  if (hit.exchanged_at) return 'already'
-  hit.exchanged_at = new Date().toISOString()
-  lsave(db)
+  if (hit.used_at) return 'already'
+  hit.used_at = new Date().toISOString()
+  lsave(rows)
   return 'ok'
 }
 
-export async function staffSetSlot(pin: string, s: SlotKey, closed: boolean): Promise<boolean> {
-  if (SERVER_MODE) {
-    return rpc<boolean>('docent_staff_set_slot', {
-      p_pin: pin,
-      p_program: s.program,
-      p_day: s.day,
-      p_time: s.time,
-      p_closed: closed,
-    })
-  }
-  if (pin !== LOCAL_PIN) return false
-  const db = ldb()
-  const id = slotId(s)
-  db.closed = db.closed.filter((x) => x !== id)
-  if (closed) db.closed.push(id)
-  lsave(db)
-  return true
-}
-
-export async function staffResponses(pin: string): Promise<ResponseRow[] | null> {
-  if (SERVER_MODE) return rpc<ResponseRow[] | null>('docent_staff_responses', { p_pin: pin }, 15000)
+export async function staffList(pin: string): Promise<ParticipantRow[] | null> {
+  if (SERVER_MODE) return rpc<ParticipantRow[]>('docent_staff_list', { p_pin: pin }, 15000)
   if (pin !== LOCAL_PIN) return null
-  return ldb().rows.map(({ device_id: _d, ...r }) => r)
+  return ldb().map(({ device_id: _d, ...r }) => r)
 }

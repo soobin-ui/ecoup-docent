@@ -4,3 +4,4 @@ dist
 .env.local
 tools/shots
 art/raw
+tools/fixtures/fakecam.y4m

@@ -5,38 +5,48 @@
 */
 import { useCallback, useEffect, useState } from 'react'
 
+// 시안(에코업관 미션 웹 화면.pdf) 순서
 export const STEPS = [
   'intro',
+  'howto',
   'about',
-  'talent',
   'partners',
-  's1',
-  's1b',
-  's2',
-  's3',
+  'a1',
+  'q1',
+  'b1',
+  'b2',
+  'q2',
+  'c1',
+  'c2',
+  'q3',
+  'stamp1',
+  'water',
+  'contest',
+  'works',
+  'stamp2',
+  'hands',
   'complete',
-  'handson',
+  'register',
   'survey',
-  'exchange',
+  'ticket',
 ] as const
 export type Step = (typeof STEPS)[number]
 
-export type Bookings = Record<string, { day: string; time: string }>
+export type Ticket = { no: number; issuedAt: string; usedAt: string | null; offline?: boolean }
 
 export type Progress = {
   deviceId: string
   step: Step
-  maxStep: number // 지금까지 도달한 가장 먼 단계(앞으로 건너뛰기 방지)
-  solved: [boolean, boolean, boolean]
-  bookings: Bookings // 체험 id → 고른 회차
-  nickname: string
-  survey: Record<string, string> | null
-  code: string | null // 교환 번호
-  offlineCode: boolean
-  exchanged: boolean
+  maxStep: number // 지금까지 도달한 가장 먼 단계
+  solved: [boolean, boolean, boolean] // 암호 3개
+  stamps: [boolean, boolean, boolean] // 전시 투어 · 경진대회 · 체험
+  reg: { name: string; phone8: string; who: string; consent: boolean } | null
+  survey: Record<string, string | string[] | number> | null
+  ticket: Ticket | null
 }
 
-const KEY = 'ecoup-docent-v1'
+// v2 = 시안 반영 후(이전 v1 저장분과 구조가 달라 새로 시작)
+const KEY = 'ecoup-docent-v2'
 
 function newId() {
   const a = new Uint8Array(12)
@@ -50,19 +60,21 @@ function fresh(deviceId?: string): Progress {
     step: 'intro',
     maxStep: 0,
     solved: [false, false, false],
-    bookings: {},
-    nickname: '',
+    stamps: [false, false, false],
+    reg: null,
     survey: null,
-    code: null,
-    offlineCode: false,
-    exchanged: false,
+    ticket: null,
   }
 }
 
 function load(): Progress {
   try {
     const raw = localStorage.getItem(KEY)
-    if (raw) return { ...fresh(), ...JSON.parse(raw) }
+    if (raw) {
+      const p = { ...fresh(), ...JSON.parse(raw) } as Progress
+      if (!STEPS.includes(p.step)) p.step = 'intro'
+      return p
+    }
   } catch {
     /* 저장소 막힘 — 새로 시작 */
   }
@@ -93,21 +105,20 @@ export function useProgress() {
     window.scrollTo({ top: 0 })
   }, [])
 
-  // 처음부터 다시 — 기기 번호는 유지(같은 휴대폰 중복 수령 방지), 교환 기록도 유지
+  // 처음부터 다시 — 기기 번호·등록·티켓은 유지(같은 휴대폰 중복 수령 방지)
   const restart = useCallback(() => {
-    setP((prev) => ({
-      ...fresh(prev.deviceId),
-      code: prev.code,
-      exchanged: prev.exchanged,
-      nickname: prev.nickname,
-    }))
+    setP((prev) => ({ ...fresh(prev.deviceId), reg: prev.reg, survey: prev.survey, ticket: prev.ticket }))
     window.scrollTo({ top: 0 })
   }, [])
 
   return { p, update, go, restart }
 }
 
-/** 맑음 단계 0~3 = 푼 미션 수 */
+/** 맑음 단계 0~3 = 푼 암호 수(물방울 캐릭터 색) */
 export function clarityOf(p: Progress) {
   return p.solved.filter(Boolean).length
+}
+/** 모은 스탬프 수 */
+export function stampCount(p: Progress) {
+  return p.stamps.filter(Boolean).length
 }

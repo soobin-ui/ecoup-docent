@@ -103,6 +103,33 @@ const PATHS: Record<string, ReactNode> = {
       <path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7" />
     </>
   ),
+  lamp: (
+    <>
+      <path d="M8 3h8l3 8H5z" />
+      <path d="M12 11v6M8 21h8M10 17h4" />
+    </>
+  ),
+  qr: (
+    <>
+      <rect x="3.5" y="3.5" width="6" height="6" rx="1" />
+      <rect x="14.5" y="3.5" width="6" height="6" rx="1" />
+      <rect x="3.5" y="14.5" width="6" height="6" rx="1" />
+      <path d="M14.5 14.5h2.5v2.5M20.5 14.5v.01M14.5 20.5h2M20.5 18v2.5h-1.5" />
+    </>
+  ),
+  trophy: (
+    <>
+      <path d="M7 4h10v5a5 5 0 0 1-10 0z" />
+      <path d="M7 6H4.5a2.5 2.5 0 0 0 2.6 3.5M17 6h2.5a2.5 2.5 0 0 1-2.6 3.5M12 14v4M8.5 20.5h7" />
+    </>
+  ),
+  bottle: (
+    <>
+      <path d="M10 2.5h4v3l1.5 2.5v12a1.5 1.5 0 0 1-1.5 1.5h-4A1.5 1.5 0 0 1 8.5 20V8L10 5.5z" />
+      <path d="M8.5 12h7" />
+    </>
+  ),
+  arrow: <path d="M5 12h14M13 6l6 6-6 6" />,
   // 공용
   back: <path d="M15 5l-7 7 7 7" />,
   chevron: <path d="M6 9l6 6 6-6" />,
