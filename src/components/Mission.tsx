@@ -112,7 +112,6 @@ export function RiddleScreen({ r, solved, onSolve, onNext }: { r: Riddle; solved
           )}
         </AnimatePresence>
         {solved && <p className="mt-3 text-center text-[clamp(15px,4.23vw,17.5px)] leading-relaxed text-mute">{r.done}</p>}
-        <p className="mt-4 text-center text-[11px] text-mute/70">그림 글자: Twemoji (CC-BY 4.0)</p>
 
         <BottomBar>
           {solved ? (

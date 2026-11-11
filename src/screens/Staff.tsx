@@ -187,6 +187,7 @@ function DataTab({ pin }: { pin: string }) {
         </Button>
       </div>
       <p className="mt-3 text-[13px] text-mute">※ 이름·휴대폰 번호는 선물 지급 확인·결과 보고 용도로만 쓰고 행사 종료 후 파기합니다.</p>
+      <p className="mt-2 text-[12px] text-mute/70">암호 그림: Twemoji (CC-BY 4.0) · QR 인식: jsQR (Apache-2.0)</p>
     </section>
   )
 }
