@@ -60,10 +60,14 @@ ok('동시 5명 등록 번호 안 겹침', nos.every(Boolean) && new Set(nos).si
 
 // 7) 스태프 목록
 const r9 = await call({ action: 'staff_list', pin: PIN })
-const mine = (r9.j.rows ?? []).filter((x) => String(x.name).startsWith('[테스트]'))
-ok('스태프 목록 읽기', Array.isArray(r9.j.rows), `${r9.ms}ms 전체 ${r9.j.rows?.length}줄, 테스트 ${mine.length}줄`)
-const one = mine.find((x) => x.no === t1?.no)
-ok('목록 값(휴대폰·설문·지급)', one && one.phone === '00000001' && one.best === '물의 변화, 경진대회 작품' && one.sat === 5 && one.used_at, JSON.stringify(one))
+ok('스태프 목록 읽기', Array.isArray(r9.j.rows), `${r9.ms}ms 전체 ${r9.j.rows?.length}줄`)
+const one = (r9.j.rows ?? []).find((x) => x.no === t1?.no)
+ok('스태프 목록에 개인정보 없음', (r9.j.rows ?? []).every((x) => Object.keys(x).join() === 'no,issued_at,used_at'), JSON.stringify(one))
+ok('목록에 지급시각', Boolean(one?.used_at), one?.used_at)
+
+// 8) 수식 막기 — 이름에 수식을 넣어도 시트에서 실행되지 않고 글자로 저장
+const rf = await call({ action: 'register', device: dev(7), name: '=1+1', phone: '00000007', who: '대학생', survey })
+ok('이름 수식 등록돼도 오류 없음', rf.j.ticket?.no > 0, JSON.stringify(rf.j))
 
 console.table(rows)
-console.log('테스트 줄 이름: [테스트]등록, [테스트]동시2~6')
+console.log('테스트 줄: [테스트]등록, [테스트]동시2~6, =1+1(수식 검사, 휴대폰 010-0000-0007)')
