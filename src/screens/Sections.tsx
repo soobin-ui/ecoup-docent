@@ -1,11 +1,10 @@
 import { motion } from 'framer-motion'
-import { A1, C1, C2 } from '../content/tour'
-import { BottomBar, Button, Card, Hero, Sheet } from '../components/ui'
+import { A1, C2 } from '../content/tour'
+import { BottomBar, Button, Hero, Sheet } from '../components/ui'
 import { Icon } from '../components/Icons'
 import { PollutantFinder, useFound } from './A1Finder'
 
 const fade = (i: number) => ({ initial: { opacity: 0, y: 10 }, animate: { opacity: 1, y: 0 }, transition: { delay: 0.08 + i * 0.07 } })
-const groupHead = 'text-[clamp(16.5px,4.62vw,19px)] font-bold text-sea'
 
 /* 물병 그림 — 물 종류별 색과 탁한 알갱이 */
 function Jar({ color, specks }: { color: string; specks: number }) {
@@ -84,40 +83,8 @@ export { B1Screen } from './B1Process'
 export { B2Screen } from './B2Lab'
 
 /** C · 물의 미래 ① — 정화된 물의 활용 */
-export function C1Screen({ onNext }: { onNext: () => void }) {
-  return (
-    <>
-      <Hero eyebrow={C1.eyebrow} title={C1.title} lead={C1.lead} />
-      <Sheet>
-        <p className={`${groupHead} text-center`}>{C1.useTitle}</p>
-        <p className="mt-0.5 text-center text-[clamp(14px,3.97vw,16.5px)] text-mute">{C1.useSub}</p>
-        {C1.uses.map((u, i) => (
-          <motion.div key={u.from} {...fade(i)}>
-            <Card className="mt-2.5 p-4">
-              <p className="flex items-center gap-1.5 text-[clamp(16.5px,4.62vw,19px)] font-bold text-ink">
-                {u.from}
-                <span className="text-mute">→</span>
-                <span className="rounded-full bg-[#e6f7ee] px-2 py-0.5 text-[clamp(12.5px,3.59vw,15px)] text-eco">정화</span>
-                <span className="text-mute">→</span>
-                <span className="text-[clamp(14px,3.97vw,16.5px)] text-cyan">활용</span>
-              </p>
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {u.to.map((t) => (
-                  <span key={t} className="rounded-full border border-line bg-white px-3 py-1 text-[clamp(14px,3.97vw,16.5px)] text-ink">
-                    {t}
-                  </span>
-                ))}
-              </div>
-            </Card>
-          </motion.div>
-        ))}
-        <BottomBar>
-          <Button onClick={onNext}>{C1.cta}</Button>
-        </BottomBar>
-      </Sheet>
-    </>
-  )
-}
+// C1 은 우리 마을 물 지도(C1Map.tsx)
+export { C1Screen } from './C1Map'
 
 /** C · 물의 미래 ② — 첨단산업 5가지 */
 export function C2Screen({ onNext }: { onNext: () => void }) {

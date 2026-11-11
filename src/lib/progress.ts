@@ -109,7 +109,7 @@ export function useProgress() {
   // 처음부터 다시 — 기기 번호·등록·티켓은 유지(같은 휴대폰 중복 수령 방지)
   const restart = useCallback(() => {
     setP((prev) => ({ ...fresh(prev.deviceId), reg: prev.reg, survey: prev.survey, ticket: prev.ticket }))
-    clearDraft('a1-found', 'b1-seen', 'b2-flip', 'b2-tech', 'b2-part', 'b2-water') // 처음부터 하면 B1·B2 도 다시 봐야 함
+    clearDraft('a1-found', 'b1-seen', 'b2-flip', 'b2-tech', 'b2-part', 'b2-water', 'c1-src') // 처음부터 하면 B1·B2 도 다시 봐야 함
     window.scrollTo({ top: 0 })
   }, [])
 

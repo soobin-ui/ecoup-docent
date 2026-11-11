@@ -555,3 +555,21 @@ button {
 .overlay-sky {
   background: linear-gradient(180deg, #d4f6ff 0%, #8fe2f7 55%, #4cc4ea 100%);
 }
+
+/* C1 물 지도 — 물길 위로 흐르는 흰 점선 */
+.flow-dash {
+  opacity: 0;
+  animation:
+    flow-in 0.3s forwards,
+    flow-run 1.4s linear infinite;
+}
+@keyframes flow-in {
+  to {
+    opacity: 0.9;
+  }
+}
+@keyframes flow-run {
+  to {
+    stroke-dashoffset: -10;
+  }
+}
