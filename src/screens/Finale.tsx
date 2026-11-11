@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { COMPLETE, CONTEST, HANDS, REGISTER, STAMP_GET, SURVEY, TICKET, WATER_STATION } from '../content/tour'
 import type { Progress } from '../lib/progress'
 import { stampLabel } from '../lib/day'
+import { clearDraft, useDraft } from '../lib/draft'
 import { getTicket, registerTicket, staffUse } from '../lib/api'
 import { BottomBar, Button, Card, Character, Hero, Sheet } from '../components/ui'
 import { Icon } from '../components/Icons'
@@ -231,10 +232,10 @@ export function HandsScreen({ onStamp }: { onStamp: () => void }) {
 
 /* ── 참가자 등록 1/2 ─────────────────────────────── */
 export function RegisterScreen({ p, update, onNext }: { p: Progress; update: Upd; onNext: () => void }) {
-  const [name, setName] = useState(p.reg?.name ?? '')
-  const [phone, setPhone] = useState(p.reg?.phone8 ?? '')
-  const [who, setWho] = useState(p.reg?.who ?? '')
-  const [agree, setAgree] = useState(p.reg?.consent ?? false)
+  const [name, setName] = useDraft('reg-name', p.reg?.name ?? '')
+  const [phone, setPhone] = useDraft('reg-phone', p.reg?.phone8 ?? '')
+  const [who, setWho] = useDraft('reg-who', p.reg?.who ?? '')
+  const [agree, setAgree] = useDraft('reg-agree', p.reg?.consent ?? false)
   const [err, setErr] = useState('')
 
   const next = () => {
@@ -243,6 +244,7 @@ export function RegisterScreen({ p, update, onNext }: { p: Progress; update: Upd
     if (!who) return setErr(REGISTER.errWho)
     if (!agree) return setErr(REGISTER.errConsent)
     update({ reg: { name: name.trim(), phone8: phone, who, consent: true } })
+    clearDraft('reg-name', 'reg-phone', 'reg-who', 'reg-agree')
     onNext()
   }
   const lab = 'text-[clamp(16px,4.5vw,18.5px)] font-bold text-ink'
@@ -316,7 +318,7 @@ export function RegisterScreen({ p, update, onNext }: { p: Progress; update: Upd
 
 /* ── 참가자 등록 2/2 — 설문 ──────────────────────── */
 export function SurveyScreen({ p, update, onDone }: { p: Progress; update: Upd; onDone: () => void }) {
-  const [ans, setAns] = useState<Record<string, string | string[] | number>>(p.survey ?? {})
+  const [ans, setAns] = useDraft<Record<string, string | string[] | number>>('survey', p.survey ?? {})
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
 
@@ -338,6 +340,7 @@ export function SurveyScreen({ p, update, onDone }: { p: Progress; update: Upd; 
     setErr('')
     setBusy(true)
     update({ survey: ans })
+    clearDraft('survey')
     try {
       const t = await registerTicket({ deviceId: p.deviceId, name: p.reg.name, phone8: p.reg.phone8, who: p.reg.who, survey: ans })
       update({ ticket: { ...t, offline: false } })

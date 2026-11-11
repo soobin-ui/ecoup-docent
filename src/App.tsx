@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { STEPS, clarityOf, useProgress } from './lib/progress'
 import type { Step } from './lib/progress'
 import { kindOf } from './lib/stampCodes'
+import { useScrollMemory } from './lib/draft'
 import { RIDDLES } from './content/tour'
 import { Header, Page } from './components/ui'
 import { RiddleScreen } from './components/Mission'
@@ -28,6 +29,7 @@ export default function App() {
   const hash = useHash()
   const { p, update, go, restart } = useProgress()
   const clarity = clarityOf(p)
+  useScrollMemory(p.step)
 
   // 맑음 단계를 body 에 달아 물방울·관 색이 함께 바뀌게
   useEffect(() => {

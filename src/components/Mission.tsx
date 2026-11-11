@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import type { Riddle } from '../content/tour'
 import { RIDDLE_UI, STAMPS } from '../content/tour'
 import { BottomBar, Button, Character, Hero, Sheet } from './ui'
+import { useDraft } from '../lib/draft'
 import { Icon } from './Icons'
 
 /* 그림 글자(Twemoji, CC-BY 4.0 — 그림이 기종마다 달라지거나 깨지지 않게 파일로 담음) */
@@ -37,7 +38,8 @@ export function StampBoard({ got, fresh = -1, showHow = false }: { got: boolean[
 
 /* ── 암호 풀기 화면 — 맞혀야만 다음으로 ─────────────── */
 export function RiddleScreen({ r, solved, onSolve, onNext }: { r: Riddle; solved: boolean; onSolve: () => void; onNext: () => void }) {
-  const [val, setVal] = useState(solved ? r.answer : '')
+  const [draft, setVal] = useDraft(`q${r.no}`, '')
+  const val = solved ? r.answer : draft
   const [wrong, setWrong] = useState(0)
   const [overlay, setOverlay] = useState(false)
   const chars = Array.from(norm(val))
