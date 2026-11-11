@@ -3,6 +3,7 @@
   QR 페이지를 닫았다가 다시 열어도 하던 곳부터 이어집니다.
   저장이 막힌 브라우저(시크릿 모드 등)에서도 화면은 그대로 동작합니다.
 */
+import { clearDraft } from './draft'
 import { useCallback, useEffect, useState } from 'react'
 
 // 시안(에코업관 미션 웹 화면.pdf) 순서
@@ -108,6 +109,7 @@ export function useProgress() {
   // 처음부터 다시 — 기기 번호·등록·티켓은 유지(같은 휴대폰 중복 수령 방지)
   const restart = useCallback(() => {
     setP((prev) => ({ ...fresh(prev.deviceId), reg: prev.reg, survey: prev.survey, ticket: prev.ticket }))
+    clearDraft('b1-seen') // 처음부터 하면 B1 카드도 다시 봐야 함
     window.scrollTo({ top: 0 })
   }, [])
 

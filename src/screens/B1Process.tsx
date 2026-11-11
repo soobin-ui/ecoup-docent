@@ -7,8 +7,9 @@ import { useEffect, useState } from 'react'
 import type { PointerEvent as RPointerEvent } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { B1 } from '../content/tour'
-import { BottomBar, Button, Character, Hero, Sheet } from '../components/ui'
+import { Character, Hero, Sheet } from '../components/ui'
 import { Icon } from '../components/Icons'
+import { useDraft } from '../lib/draft'
 import step1 from '../assets/img/b1/step1.webp'
 import step2 from '../assets/img/b1/step2.webp'
 import step3 from '../assets/img/b1/step3.webp'
@@ -97,7 +98,8 @@ function PicStack({ g, i, tick }: { g: number; i: number; tick: number }) {
 export function B1Screen({ onNext }: { onNext: () => void }) {
   const [g, setG] = useState<number | null>(null)
   const [i, setI] = useState(0)
-  const [seen, setSeen] = useState([false, false])
+  // 끝까지 본 카드 — 폰에 저장(새로고침·뒤로 갔다 와도 다시 안 봐도 되게)
+  const [seen, setSeen] = useDraft<boolean[]>('b1-seen', [false, false])
   const [tick, setTick] = useState(0) // 같은 단계를 다시 눌러도 표시가 다시 나오게
   const [dir, setDir] = useState(1)
   const [sx, setSx] = useState<number | null>(null)
@@ -105,6 +107,7 @@ export function B1Screen({ onNext }: { onNext: () => void }) {
   const n = g === null ? 0 : groups[g].items.length
   const last = g !== null && i === n - 1
   const other = g === 0 ? 1 : 0
+  const both = seen[0] && seen[1] // 물리·화학 둘 다 끝까지 봄
 
   // 마지막 단계까지 보면 카드에 체크
   useEffect(() => {
@@ -173,7 +176,13 @@ export function B1Screen({ onNext }: { onNext: () => void }) {
         </div>
 
         <AnimatePresence mode="wait">
-          {g === null ? (
+          {g === null && both ? (
+            <motion.div key="go" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mt-5">
+              <button onClick={onNext} className="cta flex h-14 w-full items-center justify-center gap-1 rounded-2xl text-[17px] font-bold">
+                다음으로 가기 <Icon name="back" size={18} className="rotate-180" />
+              </button>
+            </motion.div>
+          ) : g === null ? (
             <motion.div key="hint" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mt-6 flex items-center justify-center gap-2">
               <Character level={1} size={52} />
               <p className="rounded-3xl rounded-bl-md bg-white px-4 py-3 text-[clamp(14.5px,4.1vw,17px)] font-bold text-sea shadow-[0_6px_16px_-10px_rgba(8,60,100,0.5)] ring-1 ring-[#c3dde8]">
@@ -222,21 +231,23 @@ export function B1Screen({ onNext }: { onNext: () => void }) {
                   <button onClick={() => goto(i + 1)} className="flex h-12 flex-1 items-center justify-center gap-1 rounded-2xl bg-sea text-[16px] font-bold text-white">
                     다음 단계 <Icon name="back" size={18} className="rotate-180" />
                   </button>
+                ) : both ? (
+                  <button onClick={onNext} className="cta flex h-12 flex-1 items-center justify-center gap-1 rounded-2xl text-[16px] font-bold">
+                    다음으로 가기 <Icon name="back" size={18} className="rotate-180" />
+                  </button>
                 ) : (
                   <button onClick={() => open(other)} className="flex h-12 flex-1 items-center justify-center gap-1 rounded-2xl bg-cyan text-[16px] font-bold text-white">
                     {groups[other].title} 보기 <Icon name="back" size={18} className="rotate-180" />
                   </button>
                 )}
               </div>
-              {last && <p className="mt-2 text-center text-[14px] font-bold text-sea">{seen[other] ? '두 가지 처리를 모두 봤어요. 아래 다음을 눌러 주세요.' : '다른 처리 방법도 볼까요?'}</p>}
+              {/* 두 카드를 모두 끝까지 봐야 다음 화면으로 (사용자 결정 — 아래 '다음' 버튼 없음) */}
+              {last && !both && <p className="mt-2 text-center text-[14px] font-bold text-sea">{groups[other].title}까지 보면 다음으로 넘어갈 수 있어요</p>}
               {i === 0 && <p className="mt-2 text-center text-[13px] text-mute">그림을 옆으로 밀어도 넘어가요</p>}
             </motion.div>
           )}
         </AnimatePresence>
-
-        <BottomBar>
-          <Button onClick={onNext}>{B1.cta}</Button>
-        </BottomBar>
+        <div className="h-[max(24px,env(safe-area-inset-bottom))] shrink-0" />
       </Sheet>
     </>
   )
