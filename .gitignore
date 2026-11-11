@@ -7,3 +7,4 @@ art/raw
 tools/fixtures/fakecam.y4m
 .env.*.local
 tools/fixtures/*.y4m
+tools/fixtures/**/*.y4m
