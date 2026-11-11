@@ -130,6 +130,12 @@ const PATHS: Record<string, ReactNode> = {
     </>
   ),
   arrow: <path d="M5 12h14M13 6l6 6-6 6" />,
+  flask: (
+    <>
+      <path d="M9.5 3h5M10.5 3v5.5L5.5 18a2 2 0 0 0 1.8 3h9.4a2 2 0 0 0 1.8-3l-5-9.5V3" />
+      <path d="M7.5 14.5h9" />
+    </>
+  ),
   // 공용
   back: <path d="M15 5l-7 7 7 7" />,
   chevron: <path d="M6 9l6 6 6-6" />,

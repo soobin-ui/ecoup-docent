@@ -1,12 +1,10 @@
 import { motion } from 'framer-motion'
-import { A1, B2, C1, C2 } from '../content/tour'
-import type { TermGroup } from '../content/tour'
+import { A1, C1, C2 } from '../content/tour'
 import { BottomBar, Button, Card, Hero, Sheet } from '../components/ui'
 import { Icon } from '../components/Icons'
 
 const fade = (i: number) => ({ initial: { opacity: 0, y: 10 }, animate: { opacity: 1, y: 0 }, transition: { delay: 0.08 + i * 0.07 } })
 const groupHead = 'text-[clamp(16.5px,4.62vw,19px)] font-bold text-sea'
-const groupSub = 'text-[clamp(13.5px,3.85vw,16px)] font-bold text-cyan'
 
 /* 물병 그림 — 물 종류별 색과 탁한 알갱이 */
 function Jar({ color, specks }: { color: string; specks: number }) {
@@ -75,67 +73,12 @@ export function A1Screen({ onNext }: { onNext: () => void }) {
   )
 }
 
-/* 용어 묶음 카드(물리적 처리·화학적 처리 등) */
-function Terms({ g, i }: { g: TermGroup; i: number }) {
-  return (
-    <motion.div {...fade(i)}>
-      <Card className="mt-3 p-4 first:mt-0">
-        <p className={groupHead}>
-          {g.title} <span className={groupSub}>· {g.sub}</span>
-        </p>
-        <div className="mt-2 flex flex-col">
-          {g.items.map((x, k) => (
-            <div key={x.k} className={`flex items-center gap-3 py-2 ${k ? 'border-t border-line' : ''}`}>
-              <span className="w-[6.2em] shrink-0 rounded-lg bg-[#e6f6fb] py-1 text-center text-[clamp(13.5px,3.85vw,16px)] font-bold text-sea">{x.k}</span>
-              <span className="text-[clamp(14.5px,4.1vw,17px)] leading-snug text-ink">{x.v}</span>
-            </div>
-          ))}
-        </div>
-      </Card>
-    </motion.div>
-  )
-}
-
 /** B · 물의 변화 ① — 물리적·화학적 처리 */
 // B1 은 카드 + 단계별 그림 화면(B1Process.tsx)
 export { B1Screen } from './B1Process'
 
-/** B · 물의 변화 ② — 미생물 처리·미래 기술·물 3종 처리 흐름 */
-export function B2Screen({ onNext }: { onNext: () => void }) {
-  return (
-    <>
-      <Hero eyebrow={B2.eyebrow} title={B2.title} />
-      <Sheet>
-        {B2.groups.map((g, i) => (
-          <Terms key={g.title} g={g} i={i} />
-        ))}
-        <motion.div {...fade(2)}>
-          <Card className="mt-3 p-4">
-            <p className={groupHead}>{B2.flowTitle}</p>
-            {B2.flows.map((f) => (
-              <div key={f.from} className="mt-3">
-                <p className="text-[clamp(14.5px,4.1vw,17px)] font-bold text-ink">
-                  {f.from} → {f.to}
-                </p>
-                <div className="mt-1.5 flex items-center gap-1">
-                  {f.steps.map((s, k) => (
-                    <span key={s} className="flex flex-1 items-center gap-1">
-                      <span className="flex-1 rounded-lg bg-[#e8f4f7] px-1 py-1.5 text-center text-[clamp(12px,3.4vw,14px)] font-bold leading-tight text-sea">{s}</span>
-                      {k < f.steps.length - 1 && <span className="text-[12px] text-mute">›</span>}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </Card>
-        </motion.div>
-        <BottomBar>
-          <Button onClick={onNext}>{B2.cta}</Button>
-        </BottomBar>
-      </Sheet>
-    </>
-  )
-}
+// B2 는 미생물 도감·밀어서 비교·처리 순서 탭 화면(B2Lab.tsx)
+export { B2Screen } from './B2Lab'
 
 /** C · 물의 미래 ① — 정화된 물의 활용 */
 export function C1Screen({ onNext }: { onNext: () => void }) {
