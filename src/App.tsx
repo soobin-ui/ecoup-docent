@@ -38,11 +38,16 @@ export default function App() {
 
   // 휴대폰 기본 카메라로 작품·체험 QR 을 찍어 들어온 경우(?s=코드) — 같은 브라우저면 바로 스탬프
   useEffect(() => {
+    if (!new URLSearchParams(location.search).has('s')) return
     const k = kindOf(location.href)
+    // 주소 뒤 ?s=코드 는 바로 지움(새로고침해도 다시 찍히지 않게)
+    const q = new URLSearchParams(location.search)
+    q.delete('s')
+    history.replaceState(null, '', location.pathname + (q.toString() ? `?${q}` : '') + location.hash)
     if (!k) return
-    history.replaceState(null, '', location.pathname + location.hash)
-    if (k === 'contest' && p.stamps[0]) stampContest()
-    if (k === 'hands' && p.stamps[0] && p.stamps[1]) stampHands()
+    // 이미 받은 스탬프면 아무것도 안 함(다시 찍어도 앞 화면으로 되돌아가지 않게)
+    if (k === 'contest' && p.stamps[0] && !p.stamps[1]) stampContest()
+    if (k === 'hands' && p.stamps[0] && p.stamps[1] && !p.stamps[2]) stampHands()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (hash === '#staff') return <StaffScreen />

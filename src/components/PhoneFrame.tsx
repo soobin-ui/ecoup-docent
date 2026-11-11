@@ -4,7 +4,9 @@
  * 실제 관람객은 휴대폰으로 열기 때문에 이 틀을 볼 일이 없습니다.
  */
 export function PhoneFrame() {
-  const src = `${location.pathname}?inframe${location.hash}`
+  // ?s=코드(스탬프 QR) 같은 주소 뒤 정보를 틀 안 화면에 그대로 넘김
+  const extra = location.search.replace(/^\?/, '')
+  const src = `${location.pathname}?inframe${extra ? `&${extra}` : ''}${location.hash}`
   return (
     <div className="fixed inset-0 grid place-items-center overflow-auto py-6" style={{ background: 'radial-gradient(120% 90% at 50% 0%, #e3f8ff 0%, #9fe3f6 45%, #3cb6e3 100%)' }}>
       <div className="flex items-center gap-14">
