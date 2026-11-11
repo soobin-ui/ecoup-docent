@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import { A1, C1, C2 } from '../content/tour'
 import { BottomBar, Button, Card, Hero, Sheet } from '../components/ui'
 import { Icon } from '../components/Icons'
+import { PollutantFinder, useFound } from './A1Finder'
 
 const fade = (i: number) => ({ initial: { opacity: 0, y: 10 }, animate: { opacity: 1, y: 0 }, transition: { delay: 0.08 + i * 0.07 } })
 const groupHead = 'text-[clamp(16.5px,4.62vw,19px)] font-bold text-sea'
@@ -29,6 +30,8 @@ function Jar({ color, specks }: { color: string; specks: number }) {
 
 /** A · 물의 이해 — 물 3종 + 오염물질 5가지 */
 export function A1Screen({ onNext }: { onNext: () => void }) {
+  const [found, setFound] = useFound()
+  const all = found.every(Boolean)
   return (
     <>
       <Hero eyebrow={A1.eyebrow} title={A1.title} />
@@ -52,21 +55,21 @@ export function A1Screen({ onNext }: { onNext: () => void }) {
             </motion.div>
           ))}
         </div>
+        {/* 물속 오염물질 5가지 — 돋보기로 찾기(A1Finder.tsx) */}
         <motion.div {...fade(3)}>
-          <Card className="mt-4 p-4">
-            <p className={groupHead}>{A1.pollutantsTitle}</p>
-            <div className="mt-2 flex flex-col">
-              {A1.pollutants.map((x, i) => (
-                <div key={x.name} className={`flex items-center gap-3 py-2 ${i ? 'border-t border-line' : ''}`}>
-                  <span className="w-[6.4em] shrink-0 rounded-lg bg-[#e6f6fb] py-1 text-center text-[clamp(13.5px,3.85vw,16px)] font-bold text-sea">{x.name}</span>
-                  <span className="text-[clamp(14.5px,4.1vw,17px)] text-ink">{x.desc}</span>
-                </div>
-              ))}
-            </div>
-          </Card>
+          <PollutantFinder found={found} setFound={setFound} />
         </motion.div>
         <BottomBar>
-          <Button onClick={onNext}>{A1.cta}</Button>
+          {/* 5개를 다 찾아야 다음 */}
+          {!all && (
+            <p className="mx-auto mb-2 flex w-fit items-center justify-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-center text-[clamp(12.5px,3.6vw,14.5px)] font-bold text-sea shadow-[0_4px_12px_-6px_rgba(8,60,100,0.45)] ring-1 ring-[#c3dde8]">
+              <Icon name="lock" size={15} />
+              5가지를 모두 찾으면 넘어갈 수 있어요 ({found.filter(Boolean).length}/5)
+            </p>
+          )}
+          <Button onClick={onNext} disabled={!all}>
+            {A1.cta}
+          </Button>
         </BottomBar>
       </Sheet>
     </>

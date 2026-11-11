@@ -250,8 +250,8 @@ export function B2Screen({ onNext }: { onNext: () => void }) {
               </div>
               <div className="tile mt-3 rounded-3xl p-2.5">
                 <Compare key={t} t={t} onDone={() => done(t)} />
-                <div className="mt-2.5 px-1 pb-1">
-                  <p className="flex flex-wrap items-baseline gap-x-2 text-[clamp(18px,5.1vw,21px)] font-bold text-ink">
+                <div className="mt-2.5 px-1 pb-1 text-center">
+                  <p className="flex flex-wrap items-baseline justify-center gap-x-2 text-[clamp(18px,5.1vw,21px)] font-bold text-ink">
                     {fut.items[t].k}
                     <span className="text-[clamp(12px,3.45vw,14px)] font-bold text-cyan">{TECH[t].full}</span>
                   </p>

@@ -209,7 +209,7 @@ export function B1Screen({ onNext }: { onNext: () => void }) {
               </div>
 
               <AnimatePresence mode="wait" initial={false}>
-                <motion.div key={`${g}-${i}`} initial={{ opacity: 0, x: dir * 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: dir * -16 }} transition={{ duration: 0.2 }} className="mt-3 px-1">
+                <motion.div key={`${g}-${i}`} initial={{ opacity: 0, x: dir * 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: dir * -16 }} transition={{ duration: 0.2 }} className="mt-3 px-1 text-center">
                   <p className="text-[13px] font-bold text-cyan">
                     {i + 1} / {n}
                   </p>
