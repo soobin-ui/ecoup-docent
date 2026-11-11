@@ -248,7 +248,7 @@ export const RIDDLE_UI = {
   input: '정답 입력',
   placeholder: '글자를 입력해 주세요',
   check: '정답 확인',
-  wrong: '아쉬워요! 다시 생각해 볼까요?',
+  wrong: '거의 다 왔어요! 그림을 다시 소리 내어 읽어 보세요.',
   lock: '정답을 맞혀야 다음으로 넘어가요',
 }
 
