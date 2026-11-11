@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { A1, B1, B2, C1, C2 } from '../content/tour'
+import { A1, B2, C1, C2 } from '../content/tour'
 import type { TermGroup } from '../content/tour'
 import { BottomBar, Button, Card, Hero, Sheet } from '../components/ui'
 import { Icon } from '../components/Icons'
@@ -97,21 +97,8 @@ function Terms({ g, i }: { g: TermGroup; i: number }) {
 }
 
 /** B · 물의 변화 ① — 물리적·화학적 처리 */
-export function B1Screen({ onNext }: { onNext: () => void }) {
-  return (
-    <>
-      <Hero eyebrow={B1.eyebrow} title={B1.title} />
-      <Sheet>
-        {B1.groups.map((g, i) => (
-          <Terms key={g.title} g={g} i={i} />
-        ))}
-        <BottomBar>
-          <Button onClick={onNext}>{B1.cta}</Button>
-        </BottomBar>
-      </Sheet>
-    </>
-  )
-}
+// B1 은 카드 + 단계별 그림 화면(B1Process.tsx)
+export { B1Screen } from './B1Process'
 
 /** B · 물의 변화 ② — 미생물 처리·미래 기술·물 3종 처리 흐름 */
 export function B2Screen({ onNext }: { onNext: () => void }) {
