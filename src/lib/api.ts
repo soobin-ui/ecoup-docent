@@ -17,8 +17,10 @@ export type RegIn = {
 }
 export type TicketOut = { no: number; issuedAt: string; usedAt: string | null }
 export type UseResult = 'ok' | 'already' | 'notfound' | 'badpin'
-export type ParticipantRow = {
-  no: number
+/** 스태프 화면 집계용 — 이름·휴대폰·설문은 서버가 내보내지 않음(명단은 구글 시트에서 확인) */
+export type ParticipantRow = { no: number; issued_at: string; used_at: string | null }
+type LocalRow = ParticipantRow & {
+  device_id: string
   name: string
   phone: string
   who: string
@@ -27,8 +29,6 @@ export type ParticipantRow = {
   best: string
   fun: string
   career: string
-  issued_at: string
-  used_at: string | null
 }
 type RawTicket = { no: number; issued_at: string; used_at: string | null }
 
@@ -58,7 +58,6 @@ async function call<T>(action: string, body: Record<string, unknown>, timeoutMs 
 /* ── 흉내 DB (서버 없을 때) ─────────────────────────────── */
 const LOCAL_KEY = 'ecoup-docent-localdb-v2'
 const LOCAL_PIN = '0000'
-type LocalRow = ParticipantRow & { device_id: string }
 function ldb(): LocalRow[] {
   try {
     return JSON.parse(localStorage.getItem(LOCAL_KEY) ?? '[]')
@@ -89,7 +88,7 @@ export async function registerTicket(i: RegIn): Promise<TicketOut> {
   if (hit) return toTicket(hit)
   const row: LocalRow = {
     device_id: i.deviceId,
-    no: rows.length + 1,
+    no: rows.reduce((m, r) => Math.max(m, r.no), 0) + 1,
     name: i.name,
     phone: i.phone8,
     who: i.who,
@@ -139,5 +138,5 @@ export async function staffUse(pin: string, by: { deviceId?: string; no?: number
 export async function staffList(pin: string): Promise<ParticipantRow[] | null> {
   if (SERVER_MODE) return (await call<{ rows: ParticipantRow[] | null }>('staff_list', { pin }, 25000)).rows
   if (pin !== LOCAL_PIN) return null
-  return ldb().map(({ device_id: _d, ...r }) => r)
+  return ldb().map((r) => ({ no: r.no, issued_at: r.issued_at, used_at: r.used_at }))
 }

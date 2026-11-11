@@ -55,6 +55,22 @@ function pinOk_(pin) {
   return ok;
 }
 
+/** 참가자가 쓴 글자 → 시트에 그대로(=, +, -, @ 로 시작하면 수식으로 실행되지 않게 앞에 ' ) */
+function safe_(x, max) {
+  var t = String(x == null ? '' : x).replace(/\s+/g, ' ').trim().slice(0, max || 40);
+  return /^[=+\-@]/.test(t) ? "'" + t : t;
+}
+
+/** 다음 티켓 번호 = 지금까지 가장 큰 번호 + 1 (가운데 줄을 지워도 번호가 겹치지 않게) */
+function nextNo_(sh) {
+  var last = sh.getLastRow();
+  if (last < 2) return 1;
+  var vals = sh.getRange(2, COL.no, last - 1, 1).getValues();
+  var max = 0;
+  for (var i = 0; i < vals.length; i++) max = Math.max(max, Number(vals[i][0]) || 0);
+  return max + 1;
+}
+
 /** 기기번호로 줄 찾기(없으면 0) */
 function findRow_(sh, col, value) {
   var last = sh.getLastRow();
@@ -89,16 +105,16 @@ function doPost(e) {
     if (dev.length < 16) return out_({ error: 'bad device' });
     if (!/^\d{8}$/.test(phone)) return out_({ error: 'bad phone' });
     var lock = LockService.getScriptLock();
-    lock.waitLock(20000); // 동시에 눌러도 번호가 겹치지 않게 한 명씩
+    if (!lock.tryLock(25000)) return out_({ error: 'busy' }); // 동시에 눌러도 번호가 겹치지 않게 한 명씩
     try {
       var row = findRow_(sh, COL.device, dev);
       if (!row) {
         var s = req.survey || {};
-        var join = function (x) { return Array.isArray(x) ? x.join(', ') : String(x || ''); };
-        var no = Math.max(0, sh.getLastRow() - 1) + 1;
+        var join = function (x) { return safe_(Array.isArray(x) ? x.join(', ') : x, 80); };
+        var num = function (x) { var n = Number(x); return n >= 1 && n <= 5 ? n : ''; };
         sh.appendRow([
-          no, now_(), String(req.name || '').slice(0, 20), '010-' + phone.slice(0, 4) + '-' + phone.slice(4),
-          String(req.who || '').slice(0, 20), s.sat || '', s.understand || '', join(s.best), join(s.fun), join(s.career), '', dev,
+          nextNo_(sh), now_(), safe_(req.name, 20), '010-' + phone.slice(0, 4) + '-' + phone.slice(4),
+          safe_(req.who, 20), num(s.sat), num(s.understand), join(s.best), join(s.fun), join(s.career), '', safe_(dev, 64),
         ]);
         SpreadsheetApp.flush();
         row = sh.getLastRow();
@@ -119,7 +135,7 @@ function doPost(e) {
   if (a === 'staff_use') {
     if (!pinOk_(req.pin)) return out_({ result: 'badpin' });
     var lock2 = LockService.getScriptLock();
-    lock2.waitLock(20000);
+    if (!lock2.tryLock(25000)) return out_({ error: 'busy' });
     try {
       var r2 = req.device ? findRow_(sh, COL.device, req.device) : findRow_(sh, COL.no, req.no);
       if (!r2) return out_({ result: 'notfound' });
@@ -132,6 +148,7 @@ function doPost(e) {
     }
   }
 
+  // 스태프 화면용 집계 — 이름·휴대폰·설문은 내보내지 않음(명단은 구글 시트에서 직접 확인)
   if (a === 'staff_list') {
     if (!pinOk_(req.pin)) return out_({ rows: null });
     var last = sh.getLastRow();
@@ -140,11 +157,7 @@ function doPost(e) {
       var vals = sh.getRange(2, 1, last - 1, HEAD.length).getValues();
       for (var i = 0; i < vals.length; i++) {
         var v = vals[i];
-        rows.push({
-          no: Number(v[0]), issued_at: iso_(v[1]), name: v[2], phone: String(v[3]).replace(/\D/g, '').slice(-8), who: v[4],
-          sat: v[5] === '' ? null : Number(v[5]), understand: v[6] === '' ? null : Number(v[6]),
-          best: v[7], fun: v[8], career: v[9], used_at: iso_(v[10]),
-        });
+        rows.push({ no: Number(v[COL.no - 1]), issued_at: iso_(v[COL.issued - 1]), used_at: iso_(v[COL.used - 1]) });
       }
     }
     return out_({ rows: rows });

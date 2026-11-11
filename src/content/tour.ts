@@ -385,5 +385,5 @@ export const STAFF = {
   title: '스태프 화면',
   pin: '스태프 번호',
   enter: '들어가기',
-  tabs: ['티켓 지급', '참가자 · 엑셀'],
+  tabs: ['티켓 지급', '참가 현황'],
 }

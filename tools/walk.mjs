@@ -182,7 +182,7 @@ await click('지급 완료')
 await shot('staff_중복', false)
 const dup = await page.evaluate(() => document.body.innerText.includes('이미 지급한 티켓'))
 if (!dup) problems.push('스태프 화면에서 이미 지급한 티켓을 다시 지급 처리함')
-await click('참가자 · 엑셀')
+await click('참가 현황')
 await shot('staff_목록', false)
 
 await browser.close()

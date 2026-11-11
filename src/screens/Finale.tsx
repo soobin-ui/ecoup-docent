@@ -421,10 +421,12 @@ export function TicketScreen({ p, update, onHome }: { p: Progress; update: Upd; 
   const t = p.ticket
   const used = Boolean(t?.usedAt)
 
-  // 화면 열 때 서버 상태 확인 + 임시 티켓이면 다시 보내기
+  // 화면 열 때 서버 상태 확인 + 임시 티켓이면 다시 보내기(연결될 때까지 8초마다 재시도)
+  const offline = Boolean(p.ticket?.offline)
   useEffect(() => {
     let alive = true
-    ;(async () => {
+    let timer = 0
+    const sync = async () => {
       try {
         if (p.ticket?.offline && p.reg && p.survey) {
           const r = await registerTicket({ deviceId: p.deviceId, name: p.reg.name, phone8: p.reg.phone8, who: p.reg.who, survey: p.survey })
@@ -434,13 +436,15 @@ export function TicketScreen({ p, update, onHome }: { p: Progress; update: Upd; 
           if (alive && r) update({ ticket: { ...r, offline: false } })
         }
       } catch {
-        /* 연결 실패 — 그대로 */
+        if (alive && p.ticket?.offline) timer = window.setTimeout(sync, 8000)
       }
-    })()
+    }
+    sync()
     return () => {
       alive = false
+      window.clearTimeout(timer)
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [offline]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const startHold = () => {
     setHolding(true)

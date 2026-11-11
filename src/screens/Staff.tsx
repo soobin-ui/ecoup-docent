@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { EVENT, STAFF } from '../content/tour'
-import { dayLabel, stampLabel } from '../lib/day'
+import { dayLabel } from '../lib/day'
 import { SERVER_MODE, staffCheckPin, staffList, staffUse } from '../lib/api'
 import type { ParticipantRow } from '../lib/api'
 import { Button } from '../components/ui'
@@ -106,20 +106,6 @@ function UseTab({ pin }: { pin: string }) {
   )
 }
 
-const COLS: [keyof ParticipantRow, string][] = [
-  ['no', '티켓번호'],
-  ['issued_at', '발급시각'],
-  ['name', '이름'],
-  ['phone', '휴대폰'],
-  ['who', '구분'],
-  ['sat', '전체 만족도'],
-  ['understand', '이해도'],
-  ['best', '기억에 남는 전시'],
-  ['fun', '재미있었던 프로그램'],
-  ['career', '에코업 분야 관심'],
-  ['used_at', '선물 지급시각'],
-]
-
 function DataTab({ pin }: { pin: string }) {
   const [rows, setRows] = useState<ParticipantRow[] | null>(null)
   const [err, setErr] = useState('')
@@ -134,25 +120,6 @@ function DataTab({ pin }: { pin: string }) {
   useEffect(() => {
     load()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  const download = () => {
-    if (!rows) return
-    const cell = (k: keyof ParticipantRow, r: ParticipantRow) => {
-      const v = r[k]
-      if (k === 'issued_at' || k === 'used_at') return v ? stampLabel(String(v)) : ''
-      if (k === 'phone') return `010-${String(v).slice(0, 4)}-${String(v).slice(4)}`
-      return v ?? ''
-    }
-    const esc = (v: unknown) => `"${String(v).replace(/"/g, '""')}"`
-    const lines = [COLS.map((c) => esc(c[1])).join(',')]
-    for (const r of rows) lines.push(COLS.map(([k]) => esc(cell(k, r))).join(','))
-    // 엑셀이 한글을 깨뜨리지 않도록 BOM
-    const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' })
-    const a = document.createElement('a')
-    a.href = URL.createObjectURL(blob)
-    a.download = `에코업_도슨트_참가자_${new Date().toISOString().slice(0, 10)}.csv`
-    a.click()
-  }
 
   const dayOf = (iso: string) => new Date(new Date(iso).getTime() + 9 * 3600e3).toISOString().slice(0, 10)
   const byDay = EVENT.days.map((d) => ({ d, n: rows?.filter((r) => dayOf(r.issued_at) === d).length ?? 0, x: rows?.filter((r) => dayOf(r.issued_at) === d && r.used_at).length ?? 0 }))
@@ -179,14 +146,11 @@ function DataTab({ pin }: { pin: string }) {
         ))}
       </div>
       <div className="mt-4 flex gap-2">
-        <Button onClick={download} disabled={!rows?.length}>
-          엑셀(CSV) 내려받기
-        </Button>
-        <Button variant="outline" onClick={load} className="w-32">
+        <Button variant="outline" onClick={load}>
           새로고침
         </Button>
       </div>
-      <p className="mt-3 text-[13px] text-mute">※ 이름·휴대폰 번호는 선물 지급 확인·결과 보고 용도로만 쓰고 행사 종료 후 파기합니다.</p>
+      <p className="mt-3 text-[13px] text-mute">※ 참가자 명단(이름·휴대폰·설문)은 이 화면에 나오지 않아요. 구글 시트에서 확인해 주세요.</p>
       <p className="mt-2 text-[12px] text-mute/70">암호 그림: Twemoji (CC-BY 4.0) · QR 인식: jsQR (Apache-2.0)</p>
     </section>
   )
