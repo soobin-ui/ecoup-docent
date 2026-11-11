@@ -366,6 +366,15 @@ button {
   background: #f4fcff;
 }
 
+/* 흰 상자 — 밝은 바탕 위에서도 구분되게 또렷한 테두리 + 아래 얇은 그림자 */
+.tile {
+  background: #ffffff;
+  border: 1.5px solid #c3dde8;
+  box-shadow:
+    0 2px 0 rgba(11, 74, 117, 0.07),
+    0 10px 20px -14px rgba(8, 60, 100, 0.45);
+}
+
 /* ── 진행 관 ── */
 .pipe-seg {
   position: relative;

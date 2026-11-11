@@ -88,7 +88,7 @@ function Fridge() {
 export function WaterScreen({ onNext }: { onNext: () => void }) {
   return (
     <>
-      <Hero center eyebrow="잠깐!" title={WATER_STATION.title} />
+      <Hero eyebrow="잠깐!" title={WATER_STATION.title} />
       <div className="flex flex-1 flex-col items-center text-center">
         <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', delay: 0.2 }}>
           <Fridge />
@@ -171,7 +171,7 @@ export function WorksScreen({ onStamp }: { onStamp: () => void }) {
       <Sheet>
         <div className="flex flex-col gap-2.5">
           {CONTEST.teams.map((t, i) => (
-            <motion.div key={t.team} {...fade(i)} className="rounded-3xl bg-white px-4 py-3 shadow-[0_6px_18px_-12px_rgba(8,60,100,0.35)]">
+            <motion.div key={t.team} {...fade(i)} className="rounded-3xl tile px-4 py-3">
               <div className="flex items-center gap-2">
                 <span className="rounded-full bg-sea px-2.5 py-0.5 text-[clamp(13.5px,3.85vw,16px)] font-bold text-white">팀 {t.team}</span>
                 <span className="ml-auto flex items-center gap-1.5 text-[clamp(12.5px,3.59vw,15px)] text-mute">

@@ -18,7 +18,7 @@ import gKeyring from '../assets/img/gift-keyring.webp'
 export const LOGOS: Record<string, string> = { kus, ku, konkuk, yu, jvision, sejong }
 const GIFTS: Record<string, string> = { speaker: gSpeaker, battery: gBattery, bag: gBag, keyring: gKeyring }
 const fade = (i: number) => ({ initial: { opacity: 0, y: 10 }, animate: { opacity: 1, y: 0 }, transition: { delay: 0.1 + i * 0.07 } })
-const label = 'text-[clamp(15px,4.23vw,17.5px)] font-bold text-sea'
+const label = 'text-center text-[clamp(15px,4.23vw,17.5px)] font-bold text-sea'
 
 /** 02 HOW TO — 스탬프 3칸 + 선물뽑기 경품 */
 export function HowToScreen({ p, onNext }: { p: Progress; onNext: () => void }) {
@@ -26,7 +26,7 @@ export function HowToScreen({ p, onNext }: { p: Progress; onNext: () => void }) 
     <>
       <Hero eyebrow={HOWTO.eyebrow} title={HOWTO.title} />
       <Sheet>
-        <motion.div {...fade(0)} className="rounded-3xl bg-white p-4 shadow-[0_6px_20px_-12px_rgba(8,60,100,0.35)]">
+        <motion.div {...fade(0)} className="rounded-3xl tile p-4">
           <StampBoard got={p.stamps} showHow />
         </motion.div>
         <div className="my-2 text-center text-[22px] leading-none text-sea/60">↓</div>
@@ -38,7 +38,13 @@ export function HowToScreen({ p, onNext }: { p: Progress; onNext: () => void }) 
             {HOWTO.gifts.map((g) => (
               <div key={g.id}>
                 <img src={GIFTS[g.id]} alt={g.name} className="aspect-square w-full rounded-xl object-cover" />
-                <p className="mt-1 text-[clamp(12px,3.4vw,14px)] font-bold leading-tight text-ink">{g.name}</p>
+                <p className="mt-1 text-[clamp(11px,3.3vw,14px)] font-bold leading-tight tracking-tight text-ink">
+                  {g.name.split(' ').map((w) => (
+                    <span key={w} className="inline-block whitespace-nowrap">
+                      {w}&nbsp;
+                    </span>
+                  ))}
+                </p>
               </div>
             ))}
           </div>
@@ -66,7 +72,7 @@ export function AboutScreen({ onNext }: { onNext: () => void }) {
           {ABOUT.fields.map((f) => {
             const today = f.id === 'water'
             return (
-              <div key={f.id} className={`flex items-center gap-2.5 rounded-2xl px-3 py-3 ${today ? 'bg-cyan text-white shadow-[0_6px_14px_-6px_rgba(0,173,208,0.8)]' : 'bg-white text-ink'}`}>
+              <div key={f.id} className={`flex items-center gap-2.5 rounded-2xl px-3 py-3 ${today ? 'bg-cyan text-white shadow-[0_6px_14px_-6px_rgba(0,173,208,0.8)]' : 'tile text-ink'}`}>
                 <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${today ? 'bg-white/25' : 'bg-[#e6f7ee] text-eco'}`}>
                   <Icon name={f.id} size={19} />
                 </span>
@@ -101,9 +107,9 @@ export function AboutScreen({ onNext }: { onNext: () => void }) {
 
 /** 04 사업단 — 세종시 + 5개 대학 */
 export function PartnersScreen({ onNext }: { onNext: () => void }) {
-  const tag = (t: string) => <p className="mt-4 mb-2 text-[clamp(14px,3.97vw,16.5px)] font-bold text-mute">{t}</p>
+  const tag = (t: string) => <p className="mt-4 mb-2 text-center text-[clamp(14px,3.97vw,16.5px)] font-bold text-mute">{t}</p>
   const row = (name: string, logo: string, strong = false) => (
-    <div className={`flex items-center gap-3 rounded-2xl bg-white px-4 py-3 ${strong ? 'border-2 border-sea' : 'shadow-[0_4px_14px_-10px_rgba(8,60,100,0.35)]'}`}>
+    <div className={`flex items-center justify-center gap-3 rounded-2xl tile px-4 py-3 ${strong ? '!border-2 !border-sea' : ''}`}>
       <img src={LOGOS[logo]} alt="" className="h-9 w-[64px] shrink-0 object-contain" />
       <p className="text-[clamp(16.5px,4.62vw,19px)] font-bold text-ink">{name}</p>
     </div>
@@ -120,9 +126,9 @@ export function PartnersScreen({ onNext }: { onNext: () => void }) {
           {tag(PARTNERS.membersTag)}
           <div className="grid grid-cols-2 gap-2">
             {PARTNERS.members.map((m) => (
-              <div key={m.name} className="flex min-w-0 items-center gap-2 rounded-2xl bg-white px-2.5 py-3 shadow-[0_4px_14px_-10px_rgba(8,60,100,0.35)]">
-                <img src={LOGOS[m.logo]} alt="" className="h-8 w-[clamp(32px,11vw,44px)] shrink-0 object-contain" />
-                <p className="min-w-0 text-[clamp(14px,4.1vw,17px)] font-bold leading-tight text-ink">{m.name}</p>
+              <div key={m.name} className="flex min-w-0 flex-col items-center gap-1.5 rounded-2xl tile px-2 py-3 text-center">
+                <img src={LOGOS[m.logo]} alt="" className="h-9 w-auto max-w-[90px] object-contain" />
+                <p className="whitespace-nowrap text-[clamp(14px,4.1vw,17px)] font-bold leading-tight text-ink">{m.name}</p>
               </div>
             ))}
           </div>

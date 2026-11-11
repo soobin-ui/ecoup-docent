@@ -37,7 +37,7 @@ export function A1Screen({ onNext }: { onNext: () => void }) {
       <Sheet>
         <div className="flex flex-col gap-2.5">
           {A1.waters.map((w, i) => (
-            <motion.div key={w.id} {...fade(i)} className="flex items-center gap-3 rounded-3xl bg-white px-4 py-3 shadow-[0_6px_18px_-12px_rgba(8,60,100,0.35)]">
+            <motion.div key={w.id} {...fade(i)} className="flex items-center gap-3 rounded-3xl tile px-4 py-3">
               <Jar color={w.color} specks={3 + i * 1.5} />
               <div className="min-w-0">
                 <p className="text-[clamp(17px,4.75vw,19.5px)] font-bold text-ink">
@@ -156,8 +156,8 @@ export function C1Screen({ onNext }: { onNext: () => void }) {
     <>
       <Hero eyebrow={C1.eyebrow} title={C1.title} lead={C1.lead} />
       <Sheet>
-        <p className={groupHead}>{C1.useTitle}</p>
-        <p className="mt-0.5 text-[clamp(14px,3.97vw,16.5px)] text-mute">{C1.useSub}</p>
+        <p className={`${groupHead} text-center`}>{C1.useTitle}</p>
+        <p className="mt-0.5 text-center text-[clamp(14px,3.97vw,16.5px)] text-mute">{C1.useSub}</p>
         {C1.uses.map((u, i) => (
           <motion.div key={u.from} {...fade(i)}>
             <Card className="mt-2.5 p-4">
@@ -194,7 +194,7 @@ export function C2Screen({ onNext }: { onNext: () => void }) {
       <Sheet>
         <div className="flex flex-col gap-2.5">
           {C2.items.map((x, i) => (
-            <motion.div key={x.k} {...fade(i)} className="rounded-3xl bg-white px-4 py-3 text-left shadow-[0_6px_18px_-12px_rgba(8,60,100,0.35)]">
+            <motion.div key={x.k} {...fade(i)} className="rounded-3xl tile px-4 py-3 text-left">
               <div className="flex items-center gap-3">
                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-sea text-white">
                   <Icon name={x.icon} size={20} />

@@ -203,7 +203,7 @@ export function Page({ children, fit = false }: { children: ReactNode; fit?: boo
 }
 
 /** 물빛 위 머리 영역: 리본 머리표 + 외곽선 제목 + 한 줄 설명 */
-export function Hero({ eyebrow, title, lead, center = false, compact = false }: { eyebrow?: string; title: string[]; lead?: string; center?: boolean; compact?: boolean }) {
+export function Hero({ eyebrow, title, lead, center = true, compact = false }: { eyebrow?: string; title: string[]; lead?: string; center?: boolean; compact?: boolean }) {
   return (
     <div className={`${compact ? 'shrink-0 pb-[min(30px,3.6vh)]' : 'pb-9'} pt-1 ${center ? 'text-center' : ''}`}>
       {eyebrow && (
@@ -334,7 +334,7 @@ export function ImageSlot({ src, label, className = '', children }: { src?: stri
 }
 
 export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <div className={`rounded-3xl border border-line bg-white p-5 shadow-[0_8px_24px_-14px_rgba(8,60,100,0.35)] ${className}`}>{children}</div>
+  return <div className={`rounded-3xl tile p-5 ${className}`}>{children}</div>
 }
 
 /* ── 3D 물방울 캐릭터(힉스필드, 첫 화면 섬 위 캐릭터와 같은 모습) ── 0 흙탕물 → 3 맑은 물 */
