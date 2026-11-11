@@ -233,7 +233,7 @@ export const RIDDLES: Riddle[] = [
   {
     no: 3,
     section: 'C · 물의 미래',
-    emojis: ['1f4cf', '1fab7', '1f4a7'],
+    emojis: ['ruler', '1fab7', '1f4a7'],
     emojiAlt: ['자', '연꽃', '물(水)'],
     how: '소리 + 뜻',
     hint: '강·호수·지하수처럼 우리가 처음 얻는 물',
