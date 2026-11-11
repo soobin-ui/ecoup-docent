@@ -49,12 +49,21 @@ export function StampGetScreen({ p, which, onNext }: { p: Progress; which: 0 | 1
           ))}
         </motion.div>
       ) : (
-        <div className="mt-4 flex flex-1 items-center justify-center">
+        <div className="mt-4 flex flex-1 flex-col items-center justify-center">
+          {/* 물방울이 직접 말하는 말풍선 */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.6, y: 8 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ delay: 1.1, type: 'spring', stiffness: 260, damping: 15 }}
+            className="relative mb-3 max-w-[85%] rounded-3xl bg-white px-5 py-3 text-center [text-wrap:balance] text-[clamp(17px,4.8vw,20px)] font-bold text-sea shadow-[0_8px_20px_-8px_rgba(8,60,100,0.45)]"
+          >
+            {g.next}
+            <span className="absolute -bottom-[9px] left-1/2 h-5 w-5 -translate-x-1/2 rotate-45 rounded-[4px] bg-white" />
+          </motion.div>
           <Character level={3} size={Math.min(170, Math.round(window.innerHeight * 0.2))} bob />
         </div>
       )}
       <BottomBar tone="none">
-        {!done && <p className="mb-3 text-center text-[clamp(18px,5vw,21px)] font-bold text-sea">{g.next}</p>}
         <Button onClick={onNext} breathe>
           {done ? COMPLETE.cta : '다음'}
         </Button>
@@ -171,9 +180,11 @@ export function WorksScreen({ onStamp }: { onStamp: () => void }) {
       <Sheet>
         <div className="flex flex-col gap-2.5">
           {CONTEST.teams.map((t, i) => (
-            <motion.div key={t.team} {...fade(i)} className="rounded-3xl tile px-4 py-3">
+            <motion.div key={t.team} {...fade(i)} className="rounded-3xl tile border-l-[6px] px-4 py-3" style={{ borderLeftColor: t.color }}>
               <div className="flex items-center gap-2">
-                <span className="rounded-full bg-sea px-2.5 py-0.5 text-[clamp(13.5px,3.85vw,16px)] font-bold text-white">팀 {t.team}</span>
+                <span className="rounded-full px-2.5 py-0.5 text-[clamp(13.5px,3.85vw,16px)] font-bold text-white" style={{ background: t.color }}>
+                  팀 {t.team}
+                </span>
                 <span className="ml-auto flex items-center gap-1.5 text-[clamp(12.5px,3.59vw,15px)] text-mute">
                   <img src={LOGOS[t.logo]} alt="" className="h-5 w-auto max-w-[44px] object-contain" />
                   {t.school}
@@ -206,13 +217,15 @@ export function HandsScreen({ onStamp }: { onStamp: () => void }) {
           {HANDS.programs.map((pr, i) => (
             <motion.div key={pr.id} {...fade(i)}>
               <Card className="flex gap-3.5 p-4">
-                <span className="grid h-[68px] w-[68px] shrink-0 place-items-center rounded-2xl bg-eco text-white">
+                <span className="grid h-[68px] w-[68px] shrink-0 place-items-center rounded-2xl text-white" style={{ background: `linear-gradient(150deg, ${pr.color}, ${pr.color}cc)` }}>
                   <Icon name={pr.icon} size={34} />
                 </span>
                 <div className="min-w-0">
                   <p className="text-[clamp(18px,5vw,21px)] font-bold text-ink">{pr.name}</p>
                   <p className={`${t15} mt-0.5 leading-snug text-mute`}>{pr.desc}</p>
-                  <span className="mt-2 inline-block rounded-full bg-[#e6f7ee] px-2.5 py-1 text-[clamp(13px,3.72vw,15.5px)] font-bold text-eco">{pr.gift}</span>
+                  <span className="mt-2 inline-block rounded-full px-2.5 py-1 text-[clamp(13px,3.72vw,15.5px)] font-bold" style={{ background: pr.soft, color: pr.color }}>
+                    {pr.gift}
+                  </span>
                 </div>
               </Card>
             </motion.div>

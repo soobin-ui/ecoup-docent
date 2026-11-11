@@ -196,11 +196,14 @@ export function C2Screen({ onNext }: { onNext: () => void }) {
           {C2.items.map((x, i) => (
             <motion.div key={x.k} {...fade(i)} className="rounded-3xl tile px-4 py-3 text-left">
               <div className="flex items-center gap-3">
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-sea text-white">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-white" style={{ background: x.color }}>
                   <Icon name={x.icon} size={20} />
                 </span>
                 <p className="flex-1 text-[clamp(17px,4.75vw,19.5px)] font-bold text-ink">
-                  {x.k} <span className="text-[clamp(13.5px,3.85vw,16px)] text-cyan">{x.tag}</span>
+                  {x.k}{' '}
+                  <span className="text-[clamp(13.5px,3.85vw,16px)]" style={{ color: x.color }}>
+                    {x.tag}
+                  </span>
                 </p>
                 <span className="text-[clamp(13px,3.72vw,15.5px)] font-bold text-sea/60">{i + 1}</span>
               </div>
