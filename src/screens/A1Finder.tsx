@@ -63,14 +63,15 @@ export function PollutantFinder({ found, setFound }: { found: boolean[]; setFoun
                   {A1.pollutants[k].name}
                 </motion.span>
               ) : (
+                // 보이는 표시는 작게(그림을 덜 가림), 누르는 영역은 44px 그대로
                 <span className="relative grid h-11 w-11 place-items-center">
                   <motion.span
-                    className="absolute inset-0 rounded-full border-[3px] border-white"
-                    animate={{ scale: [1, 1.45], opacity: [0.9, 0] }}
+                    className="absolute inset-[9px] rounded-full border-2 border-white"
+                    animate={{ scale: [1, 1.7], opacity: [0.9, 0] }}
                     transition={{ duration: 1.6, repeat: Infinity, delay: k * 0.25 }}
                   />
-                  <span className="grid h-11 w-11 place-items-center rounded-full bg-white/90 text-sea shadow-[0_4px_10px_-3px_rgba(8,60,100,0.55)] ring-2 ring-sea">
-                    <Icon name="search" size={22} />
+                  <span className="grid h-[26px] w-[26px] place-items-center rounded-full bg-white/75 text-sea shadow-[0_2px_6px_-2px_rgba(8,60,100,0.6)] ring-[1.5px] ring-sea/80">
+                    <Icon name="search" size={14} />
                   </span>
                 </span>
               )}
