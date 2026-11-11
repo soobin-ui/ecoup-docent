@@ -261,7 +261,7 @@ export const STAMP_GET = [
 export const WATER_STATION = {
   title: ['WATER', 'STATION'],
   head: '잠시 쉬어가요',
-  body: ['전시 관람, 수고 많았어요.', '냉장고에서 시원한 물 한 병 챙겨 가세요.'],
+  body: ['전시 투어 끝!', '경진대회로 가기 전에 물 한 병 챙겨 가세요~!'],
   cta: '다음',
 }
 
