@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { SCAN } from '../content/tour'
 import { kindOf } from '../lib/stampCodes'
 import type { StampKind } from '../lib/stampCodes'
-import { staffCheckPin } from '../lib/api'
+import { staffCheckPin, warmUp } from '../lib/api'
 
 /*
   앱 안 QR 스캐너 — 뒷면 카메라로 QR 을 읽어 맞는 스탬프면 onStamp.
@@ -65,6 +65,7 @@ export function Scanner({ kind, title, onStamp, onClose }: { kind: StampKind; ti
   const [msg, setMsg] = useState('')
   const [pinOpen, setPinOpen] = useState(false)
   const [pin, setPin] = useState('')
+  const [checking, setChecking] = useState(false) // 서버에 스태프 번호 확인 중
   // 부모가 렌더할 때마다 새 함수를 넘겨도 카메라가 다시 켜지지 않게
   const stampRef = useRef(onStamp)
   stampRef.current = onStamp
@@ -112,12 +113,25 @@ export function Scanner({ kind, title, onStamp, onClose }: { kind: StampKind; ti
     }
   }, [kind])
 
-  const staffOk = async () => {
+  // 스태프 확인 창을 열면 서버를 미리 깨워 둠(번호를 다 넣을 즈음엔 응답이 빨라지게)
+  useEffect(() => {
+    if (pinOpen) warmUp()
+  }, [pinOpen])
+
+  const staffOk = async (value = pin) => {
+    if (checking || value.length < 4) return
+    setChecking(true)
+    setMsg('')
     try {
-      if (await staffCheckPin(pin)) onStamp()
-      else setMsg('스태프 번호가 맞지 않아요')
+      if (await staffCheckPin(value)) onStamp()
+      else {
+        setMsg('스태프 번호가 맞지 않아요')
+        setPin('')
+      }
     } catch {
       setMsg('연결이 불안정해요. 다시 눌러 주세요')
+    } finally {
+      setChecking(false)
     }
   }
 
@@ -154,16 +168,31 @@ export function Scanner({ kind, title, onStamp, onClose }: { kind: StampKind; ti
               <div className="mt-3 flex gap-2">
                 <input
                   value={pin}
-                  onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                  onChange={(e) => {
+                    const v = e.target.value.replace(/\D/g, '').slice(0, 4)
+                    setPin(v)
+                    if (v.length === 4) staffOk(v) // 4자리를 다 넣으면 바로 확인
+                  }}
+                  onKeyDown={(e) => e.key === 'Enter' && staffOk()}
+                  disabled={checking}
                   inputMode="numeric"
+                  enterKeyHint="done"
                   type="password"
                   autoComplete="off"
-                  className="h-12 min-w-0 flex-1 rounded-xl border-2 border-line text-center text-[22px] tracking-[0.4em] outline-none focus:border-sea"
+                  className="h-12 min-w-0 flex-1 rounded-xl border-2 border-line text-center text-[22px] tracking-[0.4em] outline-none focus:border-sea disabled:bg-[#f1f5f7]"
                 />
-                <button onClick={staffOk} disabled={pin.length < 4} className="h-12 shrink-0 rounded-xl bg-sea px-4 font-bold text-white disabled:bg-[#b9c7cd]">
-                  스탬프 찍기
+                <button onClick={() => staffOk()} disabled={pin.length < 4 || checking} className={`flex h-12 shrink-0 items-center gap-1.5 rounded-xl bg-sea px-4 font-bold text-white ${checking ? "" : "disabled:bg-[#b9c7cd]"}`}>
+                  {checking ? (
+                    <>
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-hidden />
+                      확인 중
+                    </>
+                  ) : (
+                    '스탬프 찍기'
+                  )}
                 </button>
               </div>
+              {checking && <p className="mt-2 text-center text-[13.5px] font-bold text-cyan">스태프 번호를 확인하고 있어요. 몇 초만 기다려 주세요</p>}
             </div>
           ) : (
             <button onClick={() => setPinOpen(true)} className="h-11 text-[clamp(14.5px,4.1vw,17px)] font-bold text-white/80 underline underline-offset-4">

@@ -119,7 +119,19 @@ export async function getTicket(deviceId: string): Promise<TicketOut | null> {
 
 export async function staffCheckPin(pin: string): Promise<boolean> {
   if (SERVER_MODE) return (await call<{ ok: boolean }>('staff_pin', { pin })).ok
+  await mockDelay()
   return pin === LOCAL_PIN
+}
+
+/** 서버 미리 깨우기 — 한동안 안 쓰인 Apps Script 는 첫 응답이 느려서, 스태프 확인 창을 여는 순간 한 번 불러 둠(결과는 버림) */
+export function warmUp() {
+  if (SERVER_MODE) call('ping', {}, 10000).catch(() => {})
+}
+
+/* 흉내 DB 에서 느린 서버 흉내(점검용) — 주소에 ?mockdelay=3000 */
+function mockDelay() {
+  const ms = Number(new URLSearchParams(location.search).get('mockdelay') ?? 0)
+  return new Promise((r) => setTimeout(r, Math.min(ms, 15000)))
 }
 
 /** 선물 지급 완료 처리 — 기기 번호(참가자 화면) 또는 티켓 번호(스태프 화면) */
