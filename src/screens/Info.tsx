@@ -14,10 +14,17 @@ import gSpeaker from '../assets/img/gift-speaker.webp'
 import gBattery from '../assets/img/gift-battery.webp'
 import gBag from '../assets/img/gift-bag.webp'
 import gKeyring from '../assets/img/gift-keyring.webp'
+import picA from '../assets/img/a1/pollutants.webp'
+import picB from '../assets/img/b1/step6.webp'
+import picC from '../assets/img/c1/town.webp'
 
 export const LOGOS: Record<string, string> = { kus, ku, konkuk, yu, jvision, sejong }
 const GIFTS: Record<string, string> = { speaker: gSpeaker, battery: gBattery, bag: gBag, keyring: gKeyring }
 const fade = (i: number) => ({ initial: { opacity: 0, y: 10 }, animate: { opacity: 1, y: 0 }, transition: { delay: 0.1 + i * 0.07 } })
+/* 오늘의 전시 물길 — A 흙탕물 속 오염물질, B 뭉쳐 가라앉히는 처리, C 다시 쓰는 마을 */
+const ROUTE_PIC = [picA, picB, picC]
+const ROUTE_POS = ['50% 45%', '72% 60%', '50% 45%']
+const ROUTE_RING = ['#9a6b2f', '#3f9a8a', '#0e9fc8']
 const label = 'text-center text-[clamp(15px,4.23vw,17.5px)] font-bold text-sea'
 
 /** 02 HOW TO — 스탬프 3칸 + 선물뽑기 경품 */
@@ -85,16 +92,32 @@ export function AboutScreen({ onNext }: { onNext: () => void }) {
           })}
         </motion.div>
 
-        <motion.div {...fade(1)} className="relative mt-4 overflow-hidden rounded-3xl px-4 py-4 text-white" style={{ background: 'linear-gradient(120deg,#0b4a75,#0e6aa0 55%,#00add0)' }}>
-          <p className="text-[clamp(13px,3.72vw,15.5px)] font-bold text-white/85">{ABOUT.todayLabel}</p>
-          <p className="mt-1 text-[clamp(21px,5.9vw,25px)] font-bold">{ABOUT.todayQ}</p>
-          <div className="mt-3 flex items-center gap-1.5">
-            {ABOUT.todaySteps.map((s, i) => (
-              <span key={s} className="flex flex-1 items-center gap-1.5">
-                <span className="flex-1 rounded-xl bg-white/20 py-2 text-center text-[clamp(13.5px,3.85vw,16px)] font-bold">{s}</span>
-                {i < 2 && <span className="text-white/70">›</span>}
-              </span>
-            ))}
+        {/* 오늘의 전시 — 구역 3곳을 그림으로 잇는 물길(흙탕물 → 맑은 물) */}
+        <motion.div {...fade(1)} className="tile mt-4 rounded-3xl px-3 pt-4 pb-4 text-center">
+          <p className="flex items-center justify-center gap-1.5 text-[clamp(13px,3.72vw,15.5px)] font-bold text-mute">
+            <span className="rounded-full bg-cyan px-2.5 py-0.5 text-white">{ABOUT.todayTag}</span>
+            {ABOUT.todayTheme}
+          </p>
+          <p className="mt-2 text-[clamp(21px,5.9vw,25px)] font-bold text-sea">
+            <span className="text-[#9a6b2f]">더러운 물</span>은 어디로 갔지?
+          </p>
+          <div className="relative mt-4">
+            {/* 물길: 흙탕물 색 → 맑은 물 색 */}
+            <span className="absolute top-[34px] right-[16%] left-[16%] h-[6px] rounded-full" style={{ background: 'linear-gradient(90deg,#b08850,#7fb9a8 50%,#1fb6dc)' }} aria-hidden />
+            <div className="relative grid grid-cols-3">
+              {ABOUT.todayRoute.map((r, i) => (
+                <motion.div key={r.zone} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + i * 0.15 }} className="flex flex-col items-center">
+                  <span className="grid h-[74px] w-[74px] place-items-center overflow-hidden rounded-full bg-white ring-[3px] shadow-[0_6px_14px_-8px_rgba(8,60,100,0.6)]" style={{ ['--tw-ring-color' as string]: ROUTE_RING[i] }}>
+                    <img src={ROUTE_PIC[i]} alt="" className="h-full w-full object-cover" style={{ objectPosition: ROUTE_POS[i] }} />
+                  </span>
+                  <span className="mt-2 rounded-full px-2 py-0.5 text-[12px] font-bold text-white" style={{ background: ROUTE_RING[i] }}>
+                    {r.zone}구역
+                  </span>
+                  <span className="mt-1 text-[clamp(14.5px,4.1vw,17px)] font-bold text-ink">{r.name}</span>
+                  <span className="text-[clamp(12px,3.45vw,14px)] leading-tight text-mute [word-break:keep-all]">{r.what}</span>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </motion.div>
         <BottomBar>

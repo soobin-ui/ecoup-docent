@@ -59,9 +59,14 @@ export const ABOUT = {
     { id: 'bio', name: '생물 다양성 보전' },
   ],
   todayTag: '오늘 전시',
-  todayLabel: '오늘의 전시 · 물의 지속가능한 보전',
+  todayTheme: '물의 지속가능한 보전',
   todayQ: '더러운 물은 어디로 갔지?',
-  todaySteps: ['물의 이해', '물의 변화', '물의 미래'],
+  // 구역 3곳 — 그 구역에서 하는 일
+  todayRoute: [
+    { zone: 'A', name: '물의 이해', what: '오염물질 찾기' },
+    { zone: 'B', name: '물의 변화', what: '깨끗하게 바꾸기' },
+    { zone: 'C', name: '물의 미래', what: '다시 쓰기' },
+  ],
   cta: '다음',
 }
 
