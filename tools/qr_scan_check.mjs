@@ -5,10 +5,10 @@ import puppeteer from 'puppeteer-core'
 import path from 'node:path'
 
 const URL = process.argv[2] ?? 'http://localhost:5181/'
-const QRS = ['CT1-CWRS', 'CT2-REPASS', 'CT3-CHACHA', 'CT4-EKKONG', 'CT5-BIOSPH', 'HS1-LED', 'HS2-FILTER', '_START', '_OTHER']
+const QRS = ['CONTEST', 'HANDS', 'CT1-CWRS', 'CT2-REPASS', 'CT3-CHACHA', 'CT4-EKKONG', 'CT5-BIOSPH', 'HS1-LED', 'HS2-FILTER', '_START', '_OTHER']
 const SCREENS = [
-  { step: 'works', stamps: [true, false, false], ok: '경진대회 스탬프 획득', accept: (q) => q.startsWith('CT') },
-  { step: 'hands', stamps: [true, true, false], ok: '스탬프 3개 완성', accept: (q) => q.startsWith('HS') },
+  { step: 'works', stamps: [true, false, false], ok: '경진대회 스탬프 획득', accept: (q) => q.startsWith('CT') || q === 'CONTEST' },
+  { step: 'hands', stamps: [true, true, false], ok: '스탬프 3개 완성', accept: (q) => q.startsWith('HS') || q === 'HANDS' },
 ]
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 const rows = []
