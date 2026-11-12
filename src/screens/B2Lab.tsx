@@ -6,7 +6,7 @@
    - 세 종류의 물 = 탭을 고르면 B1·B2 그림으로 이어 보는 처리 순서
   그림: Higgsfield(GPT Image 2.6) — src/assets/img/b2, B1 그림 재사용
 */
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { PointerEvent as RPointerEvent } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { B2 } from '../content/tour'
@@ -95,51 +95,90 @@ function MicrobeCard({ k, open, onFlip }: { k: number; open: boolean; onFlip: ()
   )
 }
 
-/* ── 처리 전/후 밀어서 비교 ── */
+/* ── 처리 전/후 밀어서 비교 ──
+   부드럽게: 손가락이 움직여도 화면을 다시 그리지 않고, 한 프레임에 한 번 '처리 후 그림의 자르는 선'과
+   '손잡이 위치(transform)'만 직접 바꿈(배치 다시 계산 없음). 상자 크기는 누를 때 한 번만 잼.
+   끊기지 않게: 가운데 손잡이 띠는 위아래 스크롤로 가로채지 않게 touch-action: none,
+   그림의 나머지 부분은 위아래 스크롤이 되도록 그대로 둠(가로로 밀면 똑같이 따라옴). */
 function Compare({ t, onDone }: { t: number; onDone: () => void }) {
   const x = TECH[t]
-  const [pos, setPos] = useState(12) // 처리 후가 덮은 폭(%)
-  const [drag, setDrag] = useState(false)
+  const box = useRef<HTMLDivElement>(null)
+  const after = useRef<HTMLImageElement>(null)
+  const rail = useRef<HTMLDivElement>(null)
+  const pos = useRef(12) // 처리 후가 덮은 폭(%)
+  const rect = useRef({ left: 0, width: 1 })
+  const raf = useRef(0)
+  const dragging = useRef(false)
+  const doneRef = useRef(onDone)
+  doneRef.current = onDone
+  const [side, setSide] = useState<'before' | 'mid' | 'after'>('before') // 이름표(경계를 넘을 때만 다시 그림)
   const [moved, setMoved] = useState(false)
-  const set = (e: RPointerEvent<HTMLDivElement>) => {
-    const r = e.currentTarget.getBoundingClientRect()
-    const p = Math.max(0, Math.min(100, ((e.clientX - r.left) / r.width) * 100))
-    setPos(p)
-    if (!moved && Math.abs(p - 12) > 4) setMoved(true)
-    if (p > 85) onDone()
+
+  const paint = () => {
+    raf.current = 0
+    const p = pos.current
+    if (after.current) after.current.style.clipPath = `inset(0 ${100 - p}% 0 0)`
+    if (rail.current) rail.current.style.transform = `translate3d(${p}%,0,0)`
   }
+  const setPos = (p: number) => {
+    pos.current = p
+    if (!raf.current) raf.current = requestAnimationFrame(paint)
+    const s = p < 25 ? 'before' : p > 80 ? 'after' : 'mid'
+    setSide((o) => (o === s ? o : s))
+    if (!moved && Math.abs(p - 12) > 4) setMoved(true)
+    if (p > 85) doneRef.current()
+  }
+  const at = (clientX: number) => Math.max(0, Math.min(100, ((clientX - rect.current.left) / rect.current.width) * 100))
+  useEffect(() => () => cancelAnimationFrame(raf.current), [])
+
+  const down = (e: RPointerEvent<HTMLDivElement>) => {
+    const r = box.current!.getBoundingClientRect()
+    rect.current = { left: r.left, width: r.width }
+    e.currentTarget.setPointerCapture(e.pointerId)
+    dragging.current = true
+    box.current!.dataset.drag = '1'
+    setPos(at(e.clientX))
+  }
+  const move = (e: RPointerEvent<HTMLDivElement>) => {
+    if (dragging.current) setPos(at(e.clientX))
+  }
+  const up = () => {
+    dragging.current = false
+    if (box.current) delete box.current.dataset.drag
+  }
+
   return (
     <div
-      className="relative aspect-[3/2] w-full touch-pan-y overflow-hidden rounded-2xl bg-[#f4fbfe] select-none"
-      onPointerDown={(e) => {
-        e.currentTarget.setPointerCapture(e.pointerId)
-        setDrag(true)
-        set(e)
-      }}
-      onPointerMove={(e) => drag && set(e)}
-      onPointerUp={() => setDrag(false)}
-      onPointerCancel={() => setDrag(false)}
+      ref={box}
+      className="compare relative aspect-[3/2] w-full touch-pan-y overflow-hidden rounded-2xl bg-[#f4fbfe] select-none"
+      onPointerDown={down}
+      onPointerMove={move}
+      onPointerUp={up}
+      onPointerCancel={up}
     >
       <img src={x.before} alt={`${x.from} — 처리 전`} draggable={false} className="absolute inset-0 h-full w-full object-cover" />
-      <img src={x.after} alt={`${x.to} — 처리 후`} draggable={false} className="absolute inset-0 h-full w-full object-cover" style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }} />
+      <img ref={after} src={x.after} alt={`${x.to} — 처리 후`} draggable={false} className="cmp-after absolute inset-0 h-full w-full object-cover" style={{ clipPath: 'inset(0 88% 0 0)' }} />
       {/* 이름표 */}
-      <span className="absolute top-2 right-2 rounded-full bg-[#5d4a2b]/85 px-2.5 py-0.5 text-[12.5px] font-bold text-white transition-opacity" style={{ opacity: pos > 80 ? 0 : 1 }}>
+      <span className="pointer-events-none absolute top-2 right-2 rounded-full bg-[#5d4a2b]/85 px-2.5 py-0.5 text-[12.5px] font-bold text-white transition-opacity" style={{ opacity: side === 'after' ? 0 : 1 }}>
         처리 전 · {x.from}
       </span>
-      <span className="absolute top-2 left-2 rounded-full bg-sea/90 px-2.5 py-0.5 text-[12.5px] font-bold text-white transition-opacity" style={{ opacity: pos < 25 ? 0 : 1 }}>
+      <span className="pointer-events-none absolute top-2 left-2 rounded-full bg-sea/90 px-2.5 py-0.5 text-[12.5px] font-bold text-white transition-opacity" style={{ opacity: side === 'before' ? 0 : 1 }}>
         처리 후 · {x.to}
       </span>
-      {/* 손잡이 */}
-      <div className="pointer-events-none absolute top-0 bottom-0 w-[3px] -translate-x-1/2 bg-white shadow-[0_0_0_1px_rgba(11,74,117,0.35)]" style={{ left: `${pos}%` }}>
-        <motion.span
-          className="absolute top-1/2 left-1/2 grid h-11 w-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white text-sea shadow-[0_4px_12px_rgba(8,60,100,0.35)] ring-2 ring-sea"
-          animate={moved ? { x: 0 } : { x: [0, 10, 0, 6, 0] }}
-          transition={moved ? {} : { duration: 1.4, repeat: Infinity, repeatDelay: 0.6 }}
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-            <path d="M9 6l-6 6 6 6M15 6l6 6-6 6" />
-          </svg>
-        </motion.span>
+      {/* 손잡이: 상자 폭만 한 '레일'을 옆으로 옮김(transform 이라 배치 계산 없음) */}
+      <div ref={rail} className="cmp-rail pointer-events-none absolute inset-0" style={{ transform: 'translate3d(12%,0,0)' }}>
+        <div className="pointer-events-auto absolute top-0 bottom-0 left-0 w-14 -translate-x-1/2 touch-none">
+          <span className="absolute top-0 bottom-0 left-1/2 w-[3px] -translate-x-1/2 bg-white shadow-[0_0_0_1px_rgba(11,74,117,0.35)]" />
+          <motion.span
+            className="absolute top-1/2 left-1/2 grid h-11 w-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white text-sea shadow-[0_4px_12px_rgba(8,60,100,0.35)] ring-2 ring-sea"
+            animate={moved ? { x: 0 } : { x: [0, 10, 0, 6, 0] }}
+            transition={moved ? {} : { duration: 1.4, repeat: Infinity, repeatDelay: 0.6 }}
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M9 6l-6 6 6 6M15 6l6 6-6 6" />
+            </svg>
+          </motion.span>
+        </div>
       </div>
     </div>
   )

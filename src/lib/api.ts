@@ -148,6 +148,7 @@ function mockDelay() {
 /** 선물 지급 완료 처리 — 기기 번호(참가자 화면) 또는 티켓 번호(스태프 화면) */
 export async function staffUse(pin: string, by: { deviceId?: string; no?: number }): Promise<UseResult> {
   if (SERVER_MODE) return (await call<{ result: UseResult }>('staff_use', { pin, device: by.deviceId ?? null, no: by.no ?? null })).result
+  await mockDelay()
   if (pin !== LOCAL_PIN) return 'badpin'
   const rows = ldb()
   const hit = rows.find((r) => (by.deviceId ? r.device_id === by.deviceId : r.no === by.no))

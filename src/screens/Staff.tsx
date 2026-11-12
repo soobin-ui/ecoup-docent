@@ -11,14 +11,19 @@ export function StaffScreen() {
   const [ok, setOk] = useState(false)
   const [err, setErr] = useState('')
   const [tab, setTab] = useState(0)
+  const [busy, setBusy] = useState(false)
 
   const login = async () => {
+    if (busy || pin.length < 4) return
+    setBusy(true)
     setErr('')
     try {
       if (await staffCheckPin(pin)) setOk(true)
       else setErr('스태프 번호가 맞지 않아요')
     } catch {
       setErr('서버에 연결하지 못했어요')
+    } finally {
+      setBusy(false)
     }
   }
 
@@ -39,8 +44,8 @@ export function StaffScreen() {
           className="mt-6 h-14 rounded-2xl border-2 border-line bg-white text-center text-[22px] tracking-[0.4em] outline-none focus:border-sea"
         />
         {err && <p className="mt-2 text-[15px] font-bold text-[#c2410c]">{err}</p>}
-        <Button className="mt-4" onClick={login} disabled={pin.length < 4}>
-          {STAFF.enter}
+        <Button className="mt-4" onClick={login} disabled={pin.length < 4 || busy}>
+          {busy ? '확인 중…' : STAFF.enter}
         </Button>
       </main>
     )
@@ -63,15 +68,20 @@ export function StaffScreen() {
 function UseTab({ pin }: { pin: string }) {
   const [no, setNo] = useState('')
   const [res, setRes] = useState<{ no: string; r: string } | null>(null)
+  const [busy, setBusy] = useState(false)
   const go = async () => {
     const n = Number(no.replace(/\D/g, ''))
-    if (!n) return
+    if (!n || busy) return
+    setBusy(true)
+    setRes(null)
     try {
       const r = await staffUse(pin, { no: n })
       setRes({ no: String(n).padStart(4, '0'), r })
       if (r === 'ok') setNo('')
     } catch {
       setRes({ no: String(n), r: 'neterr' })
+    } finally {
+      setBusy(false)
     }
   }
   const text: Record<string, [string, string]> = {
@@ -93,8 +103,8 @@ function UseTab({ pin }: { pin: string }) {
           inputMode="numeric"
           className="h-14 min-w-0 flex-1 rounded-2xl border-2 border-line px-4 text-[20px] outline-none focus:border-sea"
         />
-        <button onClick={go} className="h-14 shrink-0 whitespace-nowrap rounded-2xl bg-sea px-4 font-bold text-white">
-          지급 완료
+        <button onClick={go} disabled={busy} className="h-14 shrink-0 whitespace-nowrap rounded-2xl bg-sea px-4 font-bold text-white">
+          {busy ? '확인 중…' : '지급 완료'}
         </button>
       </div>
       {res && (

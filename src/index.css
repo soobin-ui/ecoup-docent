@@ -573,3 +573,17 @@ button {
     stroke-dashoffset: -10;
   }
 }
+
+/* B2 처리 전/후 밀어서 비교 — 손가락 따라 바로 움직이고, 톡 눌렀을 때만 살짝 미끄러지게 */
+.compare .cmp-after {
+  will-change: clip-path;
+  transition: clip-path 0.22s ease-out;
+}
+.compare .cmp-rail {
+  will-change: transform;
+  transition: transform 0.22s ease-out;
+}
+.compare[data-drag] .cmp-after,
+.compare[data-drag] .cmp-rail {
+  transition: none;
+}

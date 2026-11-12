@@ -4,7 +4,7 @@ import { COMPLETE, CONTEST, HANDS, REGISTER, STAMP_GET, SURVEY, TICKET, WATER_ST
 import type { Progress } from '../lib/progress'
 import { stampLabel } from '../lib/day'
 import { clearDraft, useDraft } from '../lib/draft'
-import { getTicket, registerTicket, staffUse } from '../lib/api'
+import { getTicket, registerTicket, staffUse, warmUp } from '../lib/api'
 import { BottomBar, Button, Card, Character, Hero, Sheet } from '../components/ui'
 import { Icon } from '../components/Icons'
 import { StampBoard } from '../components/Mission'
@@ -429,6 +429,7 @@ export function TicketScreen({ p, update, onHome }: { p: Progress; update: Upd; 
   const [pinOpen, setPinOpen] = useState(false)
   const [pin, setPin] = useState('')
   const [msg, setMsg] = useState('')
+  const [busy, setBusy] = useState(false) // 지급 처리 중(서버 응답 기다림)
   const [holding, setHolding] = useState(false)
   const holdT = useRef<number | undefined>(undefined)
   const t = p.ticket
@@ -472,7 +473,14 @@ export function TicketScreen({ p, update, onHome }: { p: Progress; update: Upd; 
     setHolding(false)
     window.clearTimeout(holdT.current)
   }
+  // 스태프 번호 창을 열면 서버를 미리 깨워 둠(지급 처리 응답이 빨라지게)
+  useEffect(() => {
+    if (pinOpen) warmUp()
+  }, [pinOpen])
   const confirm = async () => {
+    if (busy || pin.length < 4) return
+    setBusy(true)
+    setMsg('')
     try {
       const r = await staffUse(pin, { deviceId: p.deviceId })
       if (r === 'ok' || r === 'already') {
@@ -483,6 +491,8 @@ export function TicketScreen({ p, update, onHome }: { p: Progress; update: Upd; 
       else setMsg('티켓 기록을 찾지 못했어요. 연결 상태를 확인해 주세요')
     } catch {
       setMsg('연결이 불안정해요. 잠시 후 다시 눌러 주세요')
+    } finally {
+      setBusy(false)
     }
   }
 
@@ -573,19 +583,34 @@ export function TicketScreen({ p, update, onHome }: { p: Progress; update: Upd; 
               <input
                 value={pin}
                 onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                onKeyDown={(e) => e.key === 'Enter' && confirm()}
+                disabled={busy}
                 inputMode="numeric"
+                enterKeyHint="done"
                 type="password"
                 autoFocus
                 autoComplete="off"
                 className="mt-4 h-14 w-full rounded-2xl border-2 border-line text-center text-[24px] tracking-[0.5em] outline-none focus:border-sea"
               />
               {msg && <p className="mt-2 text-[clamp(14.5px,4.1vw,17px)] font-bold text-[#c2410c]">{msg}</p>}
+              {busy && <p className="mt-2 text-center text-[clamp(14px,3.97vw,16px)] font-bold text-cyan">지급 처리 중이에요. 몇 초만 기다려 주세요</p>}
               <div className="mt-4 flex gap-2">
-                <button onClick={() => setPinOpen(false)} className="h-12 flex-1 rounded-2xl bg-[#eef2f3] font-bold text-mute">
+                <button onClick={() => setPinOpen(false)} disabled={busy} className="h-12 flex-1 rounded-2xl bg-[#eef2f3] font-bold text-mute disabled:opacity-50">
                   취소
                 </button>
-                <button onClick={confirm} disabled={pin.length < 4} className="h-12 flex-1 rounded-2xl bg-sea font-bold text-white disabled:bg-[#b9c7cd]">
-                  지급 완료
+                <button
+                  onClick={confirm}
+                  disabled={pin.length < 4 || busy}
+                  className={`flex h-12 flex-1 items-center justify-center gap-1.5 rounded-2xl bg-sea font-bold text-white ${busy ? '' : 'disabled:bg-[#b9c7cd]'}`}
+                >
+                  {busy ? (
+                    <>
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-hidden />
+                      확인 중
+                    </>
+                  ) : (
+                    '지급 완료'
+                  )}
                 </button>
               </div>
             </motion.div>
