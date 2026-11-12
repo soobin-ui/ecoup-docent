@@ -80,7 +80,7 @@ function MicrobeCard({ k, open, onFlip }: { k: number; open: boolean; onFlip: ()
         </div>
         {/* 뒷면 — 앞면과 같은 바탕색 */}
         <div className="tile absolute inset-0 flex flex-col items-center justify-center rounded-3xl px-3 text-center [backface-visibility:hidden] [transform:rotateY(180deg)]" style={{ background: m.bg }}>
-          <img src={m.img} alt="" draggable={false} className="h-[24%] w-auto object-contain" />
+          <img src={m.img} alt="" draggable={false} className="h-[24%] w-auto object-contain max-[359px]:hidden" />
           <span className="mt-1.5 rounded-full px-2.5 py-0.5 text-[12px] font-bold text-white" style={{ background: m.ac }}>
             {m.nick}
           </span>
@@ -205,7 +205,7 @@ export function B2Screen({ onNext }: { onNext: () => void }) {
               <button
                 onClick={() => reached[k] && goPart(k)}
                 disabled={!reached[k]}
-                className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[clamp(12px,3.45vw,14px)] font-bold ${k === part ? 'bg-sea text-white' : reached[k] ? 'bg-[#d6eef6] text-sea' : 'bg-[#eef4f7] text-[#a9bfca]'}`}
+                className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[clamp(12px,3.45vw,14px)] font-bold whitespace-nowrap max-[359px]:px-1.5 max-[359px]:text-[11px] ${k === part ? 'bg-sea text-white' : reached[k] ? 'bg-[#d6eef6] text-sea' : 'bg-[#eef4f7] text-[#a9bfca]'}`}
               >
                 <span>{k + 1}</span>
                 {x}

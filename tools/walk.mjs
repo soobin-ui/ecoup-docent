@@ -1,4 +1,4 @@
-// 전 구간 자동 주행 + 화면별 캡처 + 가로 넘침 검사 (시안 v2 흐름)
+// 전 구간 자동 주행 + 화면별 캡처 + 가로 넘침 검사 (2026-11-12 잠금형 A1·B1·B2·C1 반영)
 // node tools/walk.mjs http://localhost:5181/ [폭] [높이]
 // 가짜 카메라(tools/fixtures/fakecam.y4m: 작품 QR·체험 QR 번갈아)로 QR 스캐너까지 실제로 인식시킴
 import puppeteer from 'puppeteer-core'
@@ -72,6 +72,14 @@ async function answer(text) {
   await page.keyboard.press('Backspace')
   await page.type('input[aria-label="정답 입력"]', text)
 }
+/** '다음'이 잠겨 있는지(잠금형 화면) */
+async function nextLocked() {
+  return page.evaluate(() => [...document.querySelectorAll('button')].find((b) => b.textContent.trim() === '다음')?.disabled === true)
+}
+async function clickSel(sel) {
+  await page.evaluate((sel) => document.querySelector(sel)?.click(), sel)
+  await sleep(350)
+}
 async function waitFor(text, ms = 15000) {
   await page.waitForFunction((t) => document.body.innerText.includes(t), { timeout: ms }, text)
   await sleep(400)
@@ -90,6 +98,9 @@ await click('다음')
 await shot('partners')
 await click('투어 시작하기')
 await shot('a1')
+if (!(await nextLocked())) problems.push('A1: 처음부터 다음이 열려 있음')
+for (let k = 1; k <= 5; k++) await clickSel(`button[aria-label="오염물질 ${k} 찾기"]`)
+await shot('a1_다찾음')
 await click('다음')
 await shot('q1')
 await answer('병원균')
@@ -101,8 +112,44 @@ await sleep(1800)
 await shot('q1_정답', false)
 await click('다음 전시 보러 가기')
 await shot('b1')
-await click('다음')
+await page.evaluate(() => document.querySelectorAll('section .grid > button')[0].click())
+await sleep(800)
+for (let k = 0; k < 4; k++) await click('다음 단계')
+await click('화학적 처리 보기')
+await sleep(800)
+for (let k = 0; k < 3; k++) await click('다음 단계')
+await shot('b1_다봄')
+await click('다음으로 가기')
 await shot('b2')
+// B2 화면1: 미생물 카드 4장 뒤집기
+if (!(await nextLocked())) problems.push('B2: 처음부터 다음이 열려 있음')
+for (const h of await page.$$('button[aria-label*="카드"]')) {
+  await h.evaluate((el) => el.scrollIntoView({ block: 'center' })) // 아래 고정 막대에 가리지 않게
+  await sleep(250)
+  await h.click()
+  await sleep(600)
+}
+await shot('b2_도감')
+await click('다음')
+// B2 화면2: MBR·RO·UV 밀어 보기
+for (const t of ['MBR', 'RO 분리막', 'UV 소독']) {
+  await page.evaluate((t) => [...document.querySelectorAll('button')].find((x) => x.textContent.trim().endsWith(t))?.click(), t)
+  await sleep(400)
+  const area = await page.$('.touch-pan-y.aspect-\\[3\\/2\\]')
+  await area.evaluate((el) => el.scrollIntoView({ block: 'center' }))
+  const bx = await area.boundingBox()
+  await page.mouse.move(bx.x + bx.width * 0.12, bx.y + bx.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(bx.x + bx.width * 0.96, bx.y + bx.height / 2, { steps: 8 })
+  await page.mouse.up()
+  await sleep(1000)
+}
+await shot('b2_기술')
+await click('다음')
+// B2 화면3: 세 종류의 물
+await click('생활하수')
+await click('공장폐수')
+await shot('b2_세종류')
 await click('다음')
 await answer('응집')
 await click('정답 확인')
@@ -110,6 +157,12 @@ await sleep(1800)
 await shot('q2_정답', false)
 await click('다음 전시 보러 가기')
 await shot('c1')
+if (!(await nextLocked())) problems.push('C1: 처음부터 다음이 열려 있음')
+for (const w of ['자연수', '생활하수', '공장폐수']) {
+  await click(w)
+  await sleep(900)
+}
+await shot('c1_다봄')
 await click('다음')
 await shot('c2')
 await click('다음')

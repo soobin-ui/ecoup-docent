@@ -30,11 +30,11 @@ export function PollutantFinder({ found, setFound }: { found: boolean[]; setFoun
     <div className="tile mt-4 rounded-3xl px-3 pt-5 pb-4">
       <p className="text-center text-[clamp(17px,4.9vw,20px)] font-bold text-sea">{A1.pollutantsTitle}</p>
       <div className="mt-2.5 flex items-center justify-center gap-2">
-        <span className="flex items-center gap-1 rounded-full bg-[#e3f1f6] px-3 py-1 text-[13px] font-bold text-sea">
+        <span className="flex items-center gap-1 rounded-full bg-[#e3f1f6] px-3 py-1 text-[13px] font-bold whitespace-nowrap text-sea max-[359px]:px-2 max-[359px]:text-[11.5px]">
           <Icon name="search" size={14} /> 찾은 오염물질 {n} / 5
         </span>
         {n === 5 && (
-          <motion.span initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="rounded-full bg-lime px-3 py-1 text-[13px] font-bold text-sea">
+          <motion.span initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="rounded-full bg-lime px-3 py-1 text-[13px] font-bold whitespace-nowrap text-sea max-[359px]:px-2 max-[359px]:text-[11.5px]">
             모두 찾았어요!
           </motion.span>
         )}
