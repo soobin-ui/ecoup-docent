@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { SCAN } from '../content/tour'
 import { kindOf } from '../lib/stampCodes'
 import type { StampKind } from '../lib/stampCodes'
-import { staffCheckPin, warmUp } from '../lib/api'
+import { PIN_ON_PHONE, stampPinOk, warmUp } from '../lib/api'
 
 /*
   앱 안 QR 스캐너 — 뒷면 카메라로 QR 을 읽어 맞는 스탬프면 onStamp.
@@ -55,6 +55,26 @@ async function makeDetector(): Promise<Detect> {
     ctx.drawImage(v, 0, 0, c.width, c.height)
     const img = ctx.getImageData(0, 0, c.width, c.height)
     return window.jsQR?.(img.data, c.width, c.height, { inversionAttempts: 'dontInvert' })?.data ?? null
+  }
+}
+
+/* 휴대폰 안에서 번호를 확인하므로 아무 번호나 눌러 맞히지 못하게: 5번 틀리면 1분 잠금(새로고침해도 유지) */
+const LOCK_KEY = 'ecoup-docent-pinlock'
+const MAX_FAIL = 5
+const LOCK_MS = 60_000
+type PinLock = { fails: number; until: number }
+const readLock = (): PinLock => {
+  try {
+    return JSON.parse(localStorage.getItem(LOCK_KEY) ?? '') as PinLock
+  } catch {
+    return { fails: 0, until: 0 }
+  }
+}
+const writeLock = (l: PinLock) => {
+  try {
+    localStorage.setItem(LOCK_KEY, JSON.stringify(l))
+  } catch {
+    /* 저장 막힘 — 잠금 없이 동작 */
   }
 }
 
@@ -115,17 +135,40 @@ export function Scanner({ kind, title, onStamp, onClose }: { kind: StampKind; ti
 
   // 스태프 확인 창을 열면 서버를 미리 깨워 둠(번호를 다 넣을 즈음엔 응답이 빨라지게)
   useEffect(() => {
-    if (pinOpen) warmUp()
+    if (pinOpen && !PIN_ON_PHONE) warmUp()
   }, [pinOpen])
+
+  const [lockLeft, setLockLeft] = useState(0) // 잠금 남은 초
+  useEffect(() => {
+    const tick = () => setLockLeft(Math.max(0, Math.ceil((readLock().until - Date.now()) / 1000)))
+    tick()
+    const id = window.setInterval(tick, 1000)
+    return () => window.clearInterval(id)
+  }, [])
 
   const staffOk = async (value = pin) => {
     if (checking || value.length < 4) return
+    if (readLock().until > Date.now()) {
+      setPin('')
+      return
+    }
     setChecking(true)
     setMsg('')
     try {
-      if (await staffCheckPin(value)) onStamp()
-      else {
-        setMsg('스태프 번호가 맞지 않아요')
+      if (await stampPinOk(value)) {
+        writeLock({ fails: 0, until: 0 })
+        onStamp()
+      } else {
+        const l = readLock()
+        const fails = (l.until > 0 && l.until <= Date.now() ? 0 : l.fails) + 1
+        if (fails >= MAX_FAIL) {
+          writeLock({ fails: 0, until: Date.now() + LOCK_MS })
+          setLockLeft(LOCK_MS / 1000)
+          setMsg('여러 번 틀려서 1분 동안 넣을 수 없어요')
+        } else {
+          writeLock({ fails, until: 0 })
+          setMsg('스태프 번호가 맞지 않아요')
+        }
         setPin('')
       }
     } catch {
@@ -174,14 +217,15 @@ export function Scanner({ kind, title, onStamp, onClose }: { kind: StampKind; ti
                     if (v.length === 4) staffOk(v) // 4자리를 다 넣으면 바로 확인
                   }}
                   onKeyDown={(e) => e.key === 'Enter' && staffOk()}
-                  disabled={checking}
+                  disabled={checking || lockLeft > 0}
+                  placeholder={lockLeft > 0 ? `${lockLeft}초 뒤에 다시` : ''}
                   inputMode="numeric"
                   enterKeyHint="done"
                   type="password"
                   autoComplete="off"
-                  className="h-12 min-w-0 flex-1 rounded-xl border-2 border-line text-center text-[22px] tracking-[0.4em] outline-none focus:border-sea disabled:bg-[#f1f5f7]"
+                  className="h-12 min-w-0 flex-1 rounded-xl border-2 border-line text-center text-[22px] tracking-[0.4em] outline-none placeholder:text-[15px] placeholder:tracking-normal focus:border-sea disabled:bg-[#f1f5f7]"
                 />
-                <button onClick={() => staffOk()} disabled={pin.length < 4 || checking} className={`flex h-12 shrink-0 items-center gap-1.5 rounded-xl bg-sea px-4 font-bold text-white ${checking ? "" : "disabled:bg-[#b9c7cd]"}`}>
+                <button onClick={() => staffOk()} disabled={pin.length < 4 || checking || lockLeft > 0} className={`flex h-12 shrink-0 items-center gap-1.5 rounded-xl bg-sea px-4 font-bold text-white ${checking ? "" : "disabled:bg-[#b9c7cd]"}`}>
                   {checking ? (
                     <>
                       <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-hidden />

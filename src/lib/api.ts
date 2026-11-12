@@ -1,3 +1,4 @@
+import { pinMatches } from './pinHash'
 /*
   서버 연동층 — 구글 시트(Apps Script 웹 앱, 코드는 gas/Code.gs).
   - VITE_GAS_URL(웹 앱 주소)이 있으면 그 시트에 저장하고,
@@ -123,9 +124,19 @@ export async function staffCheckPin(pin: string): Promise<boolean> {
   return pin === LOCAL_PIN
 }
 
+/** 스탬프 대신 찍기(관람객 휴대폰) — 휴대폰 안에서 바로 확인(기다림 없음).
+ *  VITE_STAFF_PIN_HASH 가 있으면 그 값과 비교, 서버가 없으면 흉내 번호, 둘 다 아니면 예전처럼 서버에 물음.
+ *  스태프 전용 화면은 지금처럼 서버 확인(staffCheckPin)을 그대로 씀. */
+const PIN_HASH = import.meta.env.VITE_STAFF_PIN_HASH as string | undefined
+export const PIN_ON_PHONE = Boolean(PIN_HASH) || !SERVER_MODE
+export async function stampPinOk(pin: string): Promise<boolean> {
+  if (PIN_HASH) return pinMatches(pin, PIN_HASH)
+  return staffCheckPin(pin)
+}
+
 /** 서버 미리 깨우기 — 한동안 안 쓰인 Apps Script 는 첫 응답이 느려서, 스태프 확인 창을 여는 순간 한 번 불러 둠(결과는 버림) */
 export function warmUp() {
-  if (SERVER_MODE) call('ping', {}, 10000).catch(() => {})
+  if (SERVER_MODE && !PIN_HASH) call('ping', {}, 10000).catch(() => {})
 }
 
 /* 흉내 DB 에서 느린 서버 흉내(점검용) — 주소에 ?mockdelay=3000 */
