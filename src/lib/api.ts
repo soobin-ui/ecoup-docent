@@ -129,6 +129,8 @@ export async function staffCheckPin(pin: string): Promise<boolean> {
  *  스태프 전용 화면은 지금처럼 서버 확인(staffCheckPin)을 그대로 씀. */
 const PIN_HASH = import.meta.env.VITE_STAFF_PIN_HASH as string | undefined
 export const PIN_ON_PHONE = Boolean(PIN_HASH) || !SERVER_MODE
+/** 스태프 번호 해시가 들어 있음 → 선물 지급도 휴대폰에서 바로 처리 */
+export const PIN_LOCAL = Boolean(PIN_HASH)
 export async function stampPinOk(pin: string): Promise<boolean> {
   if (PIN_HASH) return pinMatches(pin, PIN_HASH)
   return staffCheckPin(pin)

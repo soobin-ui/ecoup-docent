@@ -33,7 +33,8 @@ export const STEPS = [
 ] as const
 export type Step = (typeof STEPS)[number]
 
-export type Ticket = { no: number; issuedAt: string; usedAt: string | null; offline?: boolean }
+// syncing: 휴대폰에서 바로 지급 처리하고 시트 기록을 뒤에서 보내는 중, syncFail: 시트 기록이 안 됨(스태프 화면에서 번호로 처리)
+export type Ticket = { no: number; issuedAt: string; usedAt: string | null; offline?: boolean; syncing?: boolean; syncFail?: boolean }
 
 export type Progress = {
   deviceId: string

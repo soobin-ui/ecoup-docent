@@ -4,7 +4,7 @@ import { COMPLETE, CONTEST, HANDS, REGISTER, STAMP_GET, SURVEY, TICKET, WATER_ST
 import type { Progress } from '../lib/progress'
 import { stampLabel } from '../lib/day'
 import { clearDraft, useDraft } from '../lib/draft'
-import { getTicket, registerTicket, staffUse, warmUp } from '../lib/api'
+import { PIN_LOCAL, getTicket, registerTicket, staffUse, stampPinOk, warmUp } from '../lib/api'
 import { BottomBar, Button, Card, Character, Hero, Sheet } from '../components/ui'
 import { Icon } from '../components/Icons'
 import { StampBoard } from '../components/Mission'
@@ -447,7 +447,15 @@ export function TicketScreen({ p, update, onHome }: { p: Progress; update: Upd; 
           if (alive) update({ ticket: { ...r, offline: false } })
         } else {
           const r = await getTicket(p.deviceId)
-          if (alive && r) update({ ticket: { ...r, offline: false } })
+          // 시트에 아직 없는데 휴대폰에서 지급 처리 중이던 기록 → 새로고침으로 다시 보낼 번호가 없으니 실패 표시
+          if (alive && !r && p.ticket?.syncing) update((prev) => ({ ticket: prev.ticket ? { ...prev.ticket, syncing: false, syncFail: true } : prev.ticket }))
+          if (alive && r)
+            update((prev) => {
+              const mine = prev.ticket
+              // 휴대폰에서 먼저 지급 처리했는데 시트에는 아직 없음 → 받음 유지, 기록 실패 표시(새로고침으로 다시 보낼 번호가 없음)
+              if (mine?.usedAt && !r.usedAt) return { ticket: { ...r, offline: false, usedAt: mine.usedAt, syncing: false, syncFail: true } }
+              return { ticket: { ...r, offline: false, syncing: false, syncFail: false } }
+            })
         }
       } catch {
         if (alive && p.ticket?.offline) timer = window.setTimeout(sync, 8000)
@@ -473,12 +481,47 @@ export function TicketScreen({ p, update, onHome }: { p: Progress; update: Upd; 
     setHolding(false)
     window.clearTimeout(holdT.current)
   }
-  // 스태프 번호 창을 열면 서버를 미리 깨워 둠(지급 처리 응답이 빨라지게)
+  // 스태프 번호 창을 열면 서버를 미리 깨워 둠(시트 기록이 빨라지게)
   useEffect(() => {
     if (pinOpen) warmUp()
   }, [pinOpen])
+  const alive = useRef(true)
+  useEffect(
+    () => () => {
+      alive.current = false
+    },
+    [],
+  )
+  /** 시트에 지급 기록 보내기 — 연결이 안 되거나 임시 티켓이 아직 시트에 없으면 5초마다 다시(최대 약 3분) */
+  const recordUse = async (code: string, tries = 0): Promise<void> => {
+    const retry = () => {
+      if (alive.current && tries < 36) window.setTimeout(() => recordUse(code, tries + 1), 5000)
+      else update((prev) => ({ ticket: prev.ticket ? { ...prev.ticket, syncing: false, syncFail: true } : prev.ticket }))
+    }
+    try {
+      const r = await staffUse(code, { deviceId: p.deviceId })
+      if (r === 'ok' || r === 'already') update((prev) => ({ ticket: prev.ticket ? { ...prev.ticket, syncing: false, syncFail: false } : prev.ticket }))
+      else if (r === 'notfound') retry()
+      else update((prev) => ({ ticket: prev.ticket ? { ...prev.ticket, syncing: false, syncFail: true } : prev.ticket }))
+    } catch {
+      retry()
+    }
+  }
   const confirm = async () => {
     if (busy || pin.length < 4) return
+    if (PIN_LOCAL) {
+      // 휴대폰에서 바로 확인 — 기다림 없음
+      if (!(await stampPinOk(pin))) {
+        setMsg('스태프 번호가 맞지 않아요')
+        setPin('')
+        return
+      }
+      const code = pin
+      update((prev) => ({ ticket: prev.ticket ? { ...prev.ticket, usedAt: new Date().toISOString(), syncing: true, syncFail: false } : prev.ticket }))
+      setPinOpen(false)
+      recordUse(code)
+      return
+    }
     setBusy(true)
     setMsg('')
     try {
@@ -541,6 +584,12 @@ export function TicketScreen({ p, update, onHome }: { p: Progress; update: Upd; 
           </div>
         </motion.div>
         {t?.offline && <p className="mt-3 text-center text-[clamp(14px,3.97vw,16.5px)] text-[#b45309]">{TICKET.offline}</p>}
+        {used && t?.syncing && <p className="mt-3 text-center text-[clamp(13.5px,3.85vw,16px)] text-mute">지급 기록을 시트에 보내고 있어요</p>}
+        {used && t?.syncFail && (
+          <p className="mt-3 text-center text-[clamp(13.5px,3.85vw,16px)] font-bold text-[#b45309]">
+            시트에 지급 기록이 안 됐어요 · 스태프 화면에서 {no} 지급 처리해 주세요
+          </p>
+        )}
 
         <BottomBar>
           {used ? (
