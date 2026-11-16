@@ -51,7 +51,7 @@ for (const [k, step] of [
 // 3·4·5) 세 종류의 물
 p = await open('b2', { 'b2-flip': [true, true, true, true], 'b2-tech': [true, true, true], 'b2-part': 2, 'b2-water': [true, true, true] }, '', { solved: [true, false, false] })
 for (const w of ['자연수', '생활하수', '공장폐수']) {
-  await p.evaluate((w) => [...document.querySelectorAll('button')].find((x) => x.textContent.trim().endsWith(w))?.click(), w)
+  await p.evaluate((w) => [...document.querySelectorAll('button')].find((x) => x.textContent.trim().startsWith(w))?.click(), w)
   await sleep(900)
   await p.evaluate(() => [...document.querySelectorAll('p')].find((x) => x.textContent.includes('세 종류의 물'))?.scrollIntoView({ block: 'start' }))
   await shot(p, `05_water_${w}`)

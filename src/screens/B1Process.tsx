@@ -102,6 +102,7 @@ export function B1Screen({ onNext }: { onNext: () => void }) {
   const [seen, setSeen] = useDraft<boolean[]>('b1-seen', [false, false])
   const [tick, setTick] = useState(0) // 같은 단계를 다시 눌러도 표시가 다시 나오게
   const [dir, setDir] = useState(1)
+  const [reach, setReach] = useState(0) // 이 카드에서 지금까지 본 가장 먼 단계(순서대로만 넘어가게)
   const [sx, setSx] = useState<number | null>(null)
   const groups = B1.groups
   const n = g === null ? 0 : groups[g].items.length
@@ -123,14 +124,16 @@ export function B1Screen({ onNext }: { onNext: () => void }) {
   const open = (k: number) => {
     setG(k)
     setI(0)
+    setReach(seen[k] ? 99 : 0) // 이미 끝까지 본 카드는 아무 단계나 다시 볼 수 있게
     setTick((t) => t + 1)
     // 펼친 그림이 화면 아래에 숨지 않게 그림 쪽으로 스크롤
     setTimeout(() => document.getElementById('b1-stage')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 350)
   }
   const goto = (k: number) => {
-    if (g === null || k < 0 || k >= n) return
+    if (g === null || k < 0 || k >= n || k > reach + 1) return // 건너뛰기 없이 순서대로
     setDir(k > i ? 1 : -1)
     setI(k)
+    setReach((r) => Math.max(r, k))
     setTick((t) => t + 1)
   }
   // 그림을 좌우로 밀어서 넘기기
@@ -191,17 +194,33 @@ export function B1Screen({ onNext }: { onNext: () => void }) {
             </motion.div>
           ) : (
             <motion.div key={g} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} id="b1-stage" className="tile mt-3 scroll-mt-16 rounded-3xl p-3">
-              {/* 단계 버튼: 1. 스크리닝 · 2. 침전 … */}
-              <div className="flex flex-wrap justify-center gap-1.5">
-                {groups[g].items.map((x, k) => (
-                  <button
-                    key={x.k}
-                    onClick={() => goto(k)}
-                    className={`rounded-full px-3 py-1.5 text-[clamp(13px,3.7vw,15px)] font-bold ${k === i ? 'bg-sea text-white' : k < i ? 'bg-[#d6eef6] text-sea' : 'bg-[#eef4f7] text-mute'}`}
-                  >
-                    {k + 1}. {x.k}
-                  </button>
-                ))}
+              {/* 단계 순서: 번호 동그라미를 선으로 이어 순서가 보이게 — 본 단계·다음 단계만 누를 수 있음 */}
+              <div className="relative flex items-start px-0.5">
+                <span className="absolute top-[15px] h-[4px] rounded-full bg-[#dbe9ef]" style={{ left: `${50 / n}%`, right: `${50 / n}%` }} aria-hidden />
+                <motion.span
+                  className="absolute top-[15px] h-[4px] rounded-full bg-sea"
+                  style={{ left: `${50 / n}%` }}
+                  animate={{ width: `${((100 - 100 / n) * i) / (n - 1)}%` }}
+                  transition={{ duration: 0.3 }}
+                  aria-hidden
+                />
+                {groups[g].items.map((x, k) => {
+                  const cur = k === i
+                  const done = k <= reach && !cur
+                  const can = k <= reach + 1
+                  return (
+                    <button key={x.k} onClick={() => goto(k)} disabled={!can} className="relative flex flex-1 flex-col items-center px-0.5" aria-label={`${k + 1}단계 ${x.k}`}>
+                      <span
+                        className={`grid h-[34px] w-[34px] place-items-center rounded-full text-[15px] font-bold ring-[3px] ring-white ${
+                          cur ? 'bg-sea text-white' : done ? 'bg-[#cfe9f3] text-sea' : 'bg-[#eef4f7] text-[#a9bfca]'
+                        }`}
+                      >
+                        {done ? <Icon name="check" size={16} /> : k + 1}
+                      </span>
+                      <span className={`mt-1 text-[clamp(11.5px,3.3vw,13.5px)] leading-tight font-bold [word-break:keep-all] ${cur ? 'text-sea' : done ? 'text-sea/80' : 'text-[#a9bfca]'}`}>{x.k}</span>
+                    </button>
+                  )
+                })}
               </div>
 
               <div className="mt-3 touch-pan-y overflow-hidden rounded-2xl bg-[#f4fbfe] select-none" {...swipe}>

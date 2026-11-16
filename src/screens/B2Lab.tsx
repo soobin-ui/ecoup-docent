@@ -309,13 +309,36 @@ export function B2Screen({ onNext }: { onNext: () => void }) {
           {part === 2 && (
             <motion.div key="p2" initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -24 }} transition={{ duration: 0.25 }}>
               <p className={head}>{B2.flowTitle}</p>
-              <div className="mt-4 grid grid-cols-3 gap-1.5">
-                {B2.flows.map((f, k) => (
-                  <button key={f.from} onClick={() => pickW(k)} className={`flex items-center justify-center gap-1 rounded-2xl px-1 py-2.5 text-[clamp(14px,3.97vw,16px)] font-bold ${k === w ? 'text-white' : 'bg-[#eef4f7] text-sea'}`} style={k === w ? { background: FLOW_COLOR[k] } : undefined}>
-                    {waters[k] && k !== w && <Icon name="check" size={14} />}
-                    {f.from}
-                  </button>
-                ))}
+              <p className="mt-1.5 text-center text-[clamp(13.5px,3.85vw,16px)] font-bold text-cyan">물 이름을 하나씩 눌러 보세요</p>
+              {/* 물 3가지 — 저마다 색으로 또렷하게, 아직 안 누른 물은 '눌러 보세요' 표시가 깜빡임 */}
+              <div className="mt-3 grid grid-cols-3 gap-2">
+                {B2.flows.map((f, k) => {
+                  const on = k === w
+                  const c = FLOW_COLOR[k]
+                  return (
+                    <button
+                      key={f.from}
+                      onClick={() => pickW(k)}
+                      className="relative flex h-[54px] flex-col items-center justify-center rounded-2xl text-[clamp(15px,4.25vw,17.5px)] leading-tight font-bold shadow-[0_3px_0_rgba(11,74,117,0.18)] transition"
+                      style={on ? { background: c, color: '#fff', boxShadow: `0 4px 0 ${c}55` } : { background: '#fff', color: c, border: `2.5px solid ${c}` }}
+                    >
+                      <span className="flex items-center gap-1">
+                        {waters[k] && !on && <Icon name="check" size={15} />}
+                        {f.from}
+                      </span>
+                      {!waters[k] && (
+                        <motion.span
+                          className="absolute -top-2.5 -right-1.5 rounded-full px-1.5 py-0.5 text-[11px] font-bold text-white"
+                          style={{ background: '#e8590c' }}
+                          animate={{ scale: [1, 1.12, 1] }}
+                          transition={{ duration: 1.1, repeat: Infinity }}
+                        >
+                          눌러 보세요
+                        </motion.span>
+                      )}
+                    </button>
+                  )
+                })}
               </div>
               <AnimatePresence mode="wait">
                 <motion.div key={w} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="tile mt-3 rounded-3xl px-3.5 py-4">
