@@ -75,7 +75,7 @@ export function RiddleScreen({ r, solved, onSolve, onNext }: { r: Riddle; solved
           <p className="mt-4 inline-flex items-center gap-1.5 text-[clamp(16px,4.5vw,18.5px)] font-bold text-[#d9363e]">
             <span className="h-2.5 w-2.5 rounded-full bg-[#d9363e]" /> {r.how}
           </p>
-          <p className="mt-3 rounded-2xl bg-white/80 px-3 py-2.5 text-[clamp(14.5px,4.1vw,17px)] font-bold text-ink">힌트 · {r.hint}</p>
+          <p className="mt-3 rounded-2xl bg-white/80 px-3 py-2.5 text-[clamp(14.5px,4.1vw,17px)] font-bold text-ink">{r.hint}</p>
         </section>
 
         <p className="mt-5 text-center text-[clamp(15px,4.23vw,17.5px)] font-bold text-mute">{RIDDLE_UI.input}</p>

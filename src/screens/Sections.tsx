@@ -105,7 +105,6 @@ export function C2Screen({ onNext }: { onNext: () => void }) {
                     {x.tag}
                   </span>
                 </p>
-                <span className="text-[clamp(13px,3.72vw,15.5px)] font-bold text-sea/60">{i + 1}</span>
               </div>
               <p className="pt-1.5 pl-[52px] text-[clamp(14.5px,4.1vw,17px)] leading-snug text-mute">{x.v}</p>
             </motion.div>

@@ -25,7 +25,7 @@ const rows = []
 const expect = (name, got, want) => rows.push({ name, got, ok: got === want ? 'OK' : 'XX' })
 const has = (t) => page.evaluate((t) => document.body.innerText.includes(t), t)
 const nextDisabled = () => page.evaluate(() => [...document.querySelectorAll('button')].find((x) => x.textContent.trim() === '다음')?.disabled)
-const click = (t) => page.evaluate((t) => [...document.querySelectorAll('button')].find((x) => x.textContent.trim().endsWith(t))?.click(), t)
+const click = (t) => page.evaluate((t) => [...document.querySelectorAll('button')].find((x) => x.textContent.trim().startsWith(t))?.click(), t)
 expect('처음엔 다음 잠김', await nextDisabled(), true)
 expect('안내 0/3', await has('세 가지 물을 모두 눌러 보면 넘어가요 (0/3)'), true)
 await page.evaluate(() => document.querySelector('img[alt^="정수장을 가운데"]')?.scrollIntoView({ block: 'center' }))

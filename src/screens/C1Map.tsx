@@ -49,20 +49,35 @@ export function C1Screen({ onNext }: { onNext: () => void }) {
       <Hero eyebrow={C1.eyebrow} title={C1.title} lead={C1.lead} />
       <Sheet>
         <p className="text-center text-[clamp(17px,4.9vw,20px)] font-bold text-sea">우리 마을 물 지도</p>
-        <p className="mt-1 text-center text-[clamp(13.5px,3.85vw,16px)] font-bold text-cyan">물을 골라 정화한 물이 어디로 가는지 보세요</p>
+        <p className="mt-1 text-center text-[clamp(13.5px,3.85vw,16px)] font-bold text-cyan">물 이름을 하나씩 눌러 보세요</p>
 
-        <div className="mt-4 grid grid-cols-3 gap-1.5">
-          {C1.uses.map((u, k) => (
-            <button
-              key={u.from}
-              onClick={() => pick(k)}
-              className={`flex items-center justify-center gap-1 rounded-2xl px-1 py-2.5 text-[clamp(14px,3.97vw,16px)] font-bold ${k === src ? 'text-white' : 'bg-[#eef4f7] text-sea'}`}
-              style={k === src ? { background: SRC_COLOR[k] } : undefined}
-            >
-              {seen[k] && k !== src && <Icon name="check" size={14} />}
-              {u.from}
-            </button>
-          ))}
+        <div className="mt-4 grid grid-cols-3 gap-2">
+          {/* 세 종류의 물(B2)과 같은 버튼 — 저마다 색, 아직 안 누른 물은 '눌러 보세요' 깜빡임 */}
+          {C1.uses.map((u, k) => {
+            const on = k === src
+            const c = SRC_COLOR[k]
+            return (
+              <button
+                key={u.from}
+                onClick={() => pick(k)}
+                className="relative flex h-[54px] items-center justify-center gap-1 rounded-2xl text-[clamp(15px,4.25vw,17.5px)] leading-tight font-bold shadow-[0_3px_0_rgba(11,74,117,0.18)] transition"
+                style={on ? { background: c, color: '#fff', boxShadow: `0 4px 0 ${c}55` } : { background: '#fff', color: c, border: `2.5px solid ${c}` }}
+              >
+                {seen[k] && !on && <Icon name="check" size={15} />}
+                {u.from}
+                {!seen[k] && (
+                  <motion.span
+                    className="absolute -top-2.5 -right-1.5 rounded-full px-1.5 py-0.5 text-[11px] font-bold text-white"
+                    style={{ background: '#e8590c' }}
+                    animate={{ scale: [1, 1.12, 1] }}
+                    transition={{ duration: 1.1, repeat: Infinity }}
+                  >
+                    눌러 보세요
+                  </motion.span>
+                )}
+              </button>
+            )
+          })}
         </div>
 
         <div className="relative mt-3 aspect-[47/40] w-full overflow-hidden rounded-3xl bg-[#f4fbfe] ring-1 ring-[#c3dde8]">

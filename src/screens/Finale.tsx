@@ -190,7 +190,7 @@ export function WorksScreen({ onStamp }: { onStamp: () => void }) {
                   {t.school}
                 </span>
               </div>
-              <p className="mt-2 text-[clamp(15.5px,4.36vw,18px)] font-bold leading-snug text-ink">{t.idea}</p>
+              <p className="mt-2 text-[clamp(15.5px,4.36vw,18px)] font-bold leading-snug text-ink [text-wrap:balance]">{t.idea}</p>
             </motion.div>
           ))}
         </div>
@@ -364,7 +364,7 @@ export function SurveyScreen({ p, update, onDone }: { p: Progress; update: Upd; 
           <Card key={q.id} className="mt-3 p-4 first:mt-0">
             <p className="text-[clamp(16px,4.5vw,18.5px)] font-bold text-ink">
               {q.label}
-              {q.kind === 'multi' && <span className="ml-1 text-[clamp(13px,3.72vw,15.5px)] font-medium text-cyan">· {SURVEY.multiNote}</span>}
+              {q.kind === 'multi' && <span className="ml-1 inline-block whitespace-nowrap text-[clamp(13px,3.72vw,15.5px)] font-medium text-cyan">· {SURVEY.multiNote}</span>}
             </p>
             {q.kind === 'scale' ? (
               <>

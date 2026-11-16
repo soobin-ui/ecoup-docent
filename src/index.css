@@ -68,8 +68,9 @@ body,
 }
 html {
   -webkit-text-size-adjust: 100%;
-  /* only light = 안드로이드 크롬 '자동 어둡게'·삼성 인터넷 다크 모드가 화면을 뒤집지 않게 */
+  /* only light = 크롬 '자동 어둡게'·안드로이드 웹뷰(카톡 등)가 화면을 뒤집지 않게 */
   color-scheme: only light;
+  background: #7fd8f2;
 }
 body {
   min-height: 100dvh;
@@ -81,6 +82,18 @@ body {
   -webkit-tap-highlight-color: transparent;
   word-break: keep-all;
   overflow-wrap: break-word;
+  /* 마지막 줄에 짧은 낱말 하나만 떨어지지 않게(휴대폰 폭마다 자동으로 줄 나눔을 고름) */
+  text-wrap: pretty;
+}
+/* 가운데 정렬 글·제목은 줄 길이를 고르게 */
+h1,
+h2,
+h3,
+.text-center,
+.text-center p,
+.text-center span,
+button {
+  text-wrap: balance;
 }
 input,
 select,
@@ -586,4 +599,17 @@ button {
 .compare[data-drag] .cmp-after,
 .compare[data-drag] .cmp-rail {
   transition: none;
+}
+
+/* 다크 모드용 CSS — 삼성 인터넷은 이게 있으면 '스스로 다크 모드를 처리하는 화면'으로 보고 강제로 어둡게 하지 않음.
+   내용은 밝은 화면 그대로(사용자 결정: 다크 모드여도 밝게) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: only light;
+  }
+  html,
+  body {
+    background: #7fd8f2;
+    color: var(--color-ink);
+  }
 }
