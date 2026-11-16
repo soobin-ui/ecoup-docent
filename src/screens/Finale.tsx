@@ -436,7 +436,11 @@ export function TicketScreen({ p, update, onHome }: { p: Progress; update: Upd; 
       try {
         if (p.ticket?.offline && p.reg && p.survey) {
           const r = await registerTicket({ deviceId: p.deviceId, name: p.reg.name, phone8: p.reg.phone8, who: p.reg.who, survey: p.survey })
-          if (alive) update({ ticket: { ...r, offline: false, pending: false } })
+          // 번호를 받기 전에 이미 선물을 줬으면(휴대폰에서 지급 처리) 그 '받음'은 지우지 않음
+          if (alive)
+            update((prev) => ({
+              ticket: { ...prev.ticket, ...r, offline: false, pending: false, usedAt: prev.ticket?.usedAt ?? r.usedAt },
+            }))
         } else {
           const r = await getTicket(p.deviceId)
           // 시트에 아직 없는데 휴대폰에서 지급 처리 중이던 기록 → 새로고침으로 다시 보낼 번호가 없으니 실패 표시
@@ -481,12 +485,12 @@ export function TicketScreen({ p, update, onHome }: { p: Progress; update: Upd; 
     if (pinOpen) warmUp()
   }, [pinOpen])
   const alive = useRef(true)
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    alive.current = true // 화면이 다시 붙을 때도 재시도가 이어지게
+    return () => {
       alive.current = false
-    },
-    [],
-  )
+    }
+  }, [])
   /** 시트에 지급 기록 보내기 — 연결이 안 되거나 임시 티켓이 아직 시트에 없으면 5초마다 다시(최대 약 3분) */
   const recordUse = async (code: string, tries = 0): Promise<void> => {
     const retry = () => {
