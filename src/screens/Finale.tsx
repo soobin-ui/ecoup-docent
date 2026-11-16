@@ -183,7 +183,7 @@ export function WorksScreen({ onStamp }: { onStamp: () => void }) {
             <motion.div key={t.team} {...fade(i)} className="rounded-3xl tile border-l-[6px] px-4 py-3" style={{ borderLeftColor: t.color }}>
               <div className="flex items-center gap-2">
                 <span className="rounded-full px-2.5 py-0.5 text-[clamp(13.5px,3.85vw,16px)] font-bold text-white" style={{ background: t.color }}>
-                  팀 {t.team}
+                  {t.team}
                 </span>
                 <span className="ml-auto flex items-center gap-1.5 text-[clamp(12.5px,3.59vw,15px)] text-mute">
                   <img src={LOGOS[t.logo]} alt="" className="h-5 w-auto max-w-[44px] object-contain" />
