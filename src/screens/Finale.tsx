@@ -5,7 +5,7 @@ import type { Progress } from '../lib/progress'
 import { stampLabel } from '../lib/day'
 import { clearDraft, useDraft } from '../lib/draft'
 import { PIN_LOCAL, getTicket, registerTicket, staffUse, stampPinOk, warmUp } from '../lib/api'
-import { BottomBar, Button, Card, Character, Hero, Sheet, LoadingOverlay } from '../components/ui'
+import { BottomBar, Button, Card, Character, Hero, Sheet } from '../components/ui'
 import { Icon } from '../components/Icons'
 import { StampBoard } from '../components/Mission'
 import { Scanner } from '../components/Scanner'
@@ -242,6 +242,8 @@ export function HandsScreen({ onStamp }: { onStamp: () => void }) {
 
 /* ── 참가자 등록 1/2 ─────────────────────────────── */
 export function RegisterScreen({ p, update, onNext }: { p: Progress; update: Upd; onNext: () => void }) {
+  // 서버를 미리 깨워 둠 — 설문을 내는 순간 티켓 번호가 빨리 오게
+  useEffect(() => warmUp(), [])
   const [name, setName] = useDraft('reg-name', p.reg?.name ?? '')
   const [phone, setPhone] = useDraft('reg-phone', p.reg?.phone8 ?? '')
   const [who, setWho] = useDraft('reg-who', p.reg?.who ?? '')
@@ -330,7 +332,7 @@ export function RegisterScreen({ p, update, onNext }: { p: Progress; update: Upd
 export function SurveyScreen({ p, update, onDone }: { p: Progress; update: Upd; onDone: () => void }) {
   const [ans, setAns] = useDraft<Record<string, string | string[] | number>>('survey', p.survey ?? {})
   const [err, setErr] = useState('')
-  const [busy, setBusy] = useState(false)
+  useEffect(() => warmUp(), [])
 
   const set = (id: string, v: string | number, multi = false) => {
     setAns((a) => {
@@ -348,17 +350,9 @@ export function SurveyScreen({ p, update, onDone }: { p: Progress; update: Upd; 
     if (!SURVEY.qs.every((q) => filled(q.id))) return setErr(SURVEY.needAll)
     if (!p.reg) return
     setErr('')
-    setBusy(true)
-    update({ survey: ans })
+    // 기다리지 않음 — 바로 티켓 화면으로 넘기고, 티켓 화면이 시트에 보내 번호를 받아 옴(실패하면 임시 티켓으로 8초마다 다시)
+    update((prev) => ({ survey: ans, ticket: prev.ticket ?? { no: 0, issuedAt: new Date().toISOString(), usedAt: null, offline: true, pending: true } }))
     clearDraft('survey')
-    try {
-      const t = await registerTicket({ deviceId: p.deviceId, name: p.reg.name, phone8: p.reg.phone8, who: p.reg.who, survey: ans })
-      update({ ticket: { ...t, offline: false } })
-    } catch {
-      // 연결이 끊겨도 막히지 않게 — 임시 티켓으로 보여 주고 티켓 화면에서 다시 보냄
-      update((prev) => ({ ticket: prev.ticket ?? { no: 0, issuedAt: new Date().toISOString(), usedAt: null, offline: true } }))
-    }
-    setBusy(false)
     onDone()
   }
 
@@ -412,11 +406,11 @@ export function SurveyScreen({ p, update, onDone }: { p: Progress; update: Upd; 
         ))}
         <BottomBar>
           {err && <p className="mb-2 text-center text-[clamp(14.5px,4.1vw,17px)] font-bold text-[#c2410c]">{err}</p>}
-          <Button onClick={submit} disabled={busy}>
-            {busy ? '보내는 중…' : SURVEY.submit}
+          <Button onClick={submit}>
+            {SURVEY.submit}
           </Button>
         </BottomBar>
-        {busy && <LoadingOverlay text="참가자 등록 중이에요" sub="티켓을 만들고 있어요. 잠시만 기다려 주세요" />}
+
       </Sheet>
     </>
   )
@@ -442,7 +436,7 @@ export function TicketScreen({ p, update, onHome }: { p: Progress; update: Upd; 
       try {
         if (p.ticket?.offline && p.reg && p.survey) {
           const r = await registerTicket({ deviceId: p.deviceId, name: p.reg.name, phone8: p.reg.phone8, who: p.reg.who, survey: p.survey })
-          if (alive) update({ ticket: { ...r, offline: false } })
+          if (alive) update({ ticket: { ...r, offline: false, pending: false } })
         } else {
           const r = await getTicket(p.deviceId)
           // 시트에 아직 없는데 휴대폰에서 지급 처리 중이던 기록 → 새로고침으로 다시 보낼 번호가 없으니 실패 표시
@@ -456,7 +450,10 @@ export function TicketScreen({ p, update, onHome }: { p: Progress; update: Upd; 
             })
         }
       } catch {
-        if (alive && p.ticket?.offline) timer = window.setTimeout(sync, 8000)
+        if (alive && p.ticket?.offline) {
+          update((prev) => ({ ticket: prev.ticket ? { ...prev.ticket, pending: false } : prev.ticket }))
+          timer = window.setTimeout(sync, 8000)
+        }
       }
     }
     sync()
@@ -538,7 +535,7 @@ export function TicketScreen({ p, update, onHome }: { p: Progress; update: Upd; 
   }
 
   const phone = p.reg ? `010-****-${p.reg.phone8.slice(4)}` : '-'
-  const no = t && t.no > 0 ? `No. ${String(t.no).padStart(4, '0')}` : '임시'
+  const no = t && t.no > 0 ? `No. ${String(t.no).padStart(4, '0')}` : t?.pending ? '발급 중…' : '임시'
   const field = (k: string, v: string) => (
     <div>
       <p className="text-[clamp(12.5px,3.59vw,15px)] text-mute">{k}</p>
@@ -581,7 +578,7 @@ export function TicketScreen({ p, update, onHome }: { p: Progress; update: Upd; 
             {field(used ? TICKET.fUsed : TICKET.fIssued, t ? stampLabel(used ? t.usedAt! : t.issuedAt) : '-')}
           </div>
         </motion.div>
-        {t?.offline && <p className="mt-3 text-center text-[clamp(14px,3.97vw,16.5px)] text-[#b45309]">{TICKET.offline}</p>}
+        {t?.offline && !t.pending && <p className="mt-3 text-center text-[clamp(14px,3.97vw,16.5px)] text-[#b45309]">{TICKET.offline}</p>}
         {used && t?.syncing && <p className="mt-3 text-center text-[clamp(13.5px,3.85vw,16px)] text-mute">지급 기록을 시트에 보내고 있어요</p>}
         {used && t?.syncFail && (
           <p className="mt-3 text-center text-[clamp(13.5px,3.85vw,16px)] font-bold text-[#b45309]">
@@ -640,7 +637,6 @@ export function TicketScreen({ p, update, onHome }: { p: Progress; update: Upd; 
                 className="mt-4 h-14 w-full rounded-2xl border-2 border-line text-center text-[24px] tracking-[0.5em] outline-none focus:border-sea"
               />
               {msg && <p className="mt-2 text-[clamp(14.5px,4.1vw,17px)] font-bold text-[#c2410c]">{msg}</p>}
-              {busy && <LoadingOverlay text="지급 처리 중이에요" sub="잠시만 기다려 주세요" />}
               <div className="mt-4 flex gap-2">
                 <button onClick={() => setPinOpen(false)} disabled={busy} className="h-12 flex-1 rounded-2xl bg-[#eef2f3] font-bold text-mute disabled:opacity-50">
                   취소

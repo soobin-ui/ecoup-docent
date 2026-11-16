@@ -391,15 +391,3 @@ export function FitBox({ children, className = '' }: { children: ReactNode; clas
   )
 }
 
-/** 서버 응답을 기다리는 동안 화면 가운데 로딩(연타 막기 겸) */
-export function LoadingOverlay({ text, sub }: { text: string; sub?: string }) {
-  return (
-    <div className="fixed inset-0 z-[60] grid place-items-center bg-[#071f33]/45 px-8 backdrop-blur-[2px]" role="status" aria-live="polite">
-      <div className="flex w-full max-w-[300px] flex-col items-center rounded-3xl bg-white px-6 py-7 text-center shadow-[0_20px_50px_-20px_rgba(8,50,90,0.6)]">
-        <span className="h-14 w-14 animate-spin rounded-full border-[6px] border-[#d6eef6] border-t-cyan" aria-hidden />
-        <p className="mt-4 text-[clamp(18px,5vw,21px)] font-bold text-sea">{text}</p>
-        {sub && <p className="mt-1 text-[clamp(14px,3.97vw,16px)] leading-snug text-mute">{sub}</p>}
-      </div>
-    </div>
-  )
-}

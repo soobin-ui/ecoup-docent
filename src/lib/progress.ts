@@ -34,7 +34,8 @@ export const STEPS = [
 export type Step = (typeof STEPS)[number]
 
 // syncing: 휴대폰에서 바로 지급 처리하고 시트 기록을 뒤에서 보내는 중, syncFail: 시트 기록이 안 됨(스태프 화면에서 번호로 처리)
-export type Ticket = { no: number; issuedAt: string; usedAt: string | null; offline?: boolean; syncing?: boolean; syncFail?: boolean }
+// pending: 설문 '등록 완료' 직후 — 화면은 바로 넘기고 번호는 뒤에서 받는 중(첫 시도가 끝나기 전)
+export type Ticket = { no: number; issuedAt: string; usedAt: string | null; offline?: boolean; pending?: boolean; syncing?: boolean; syncFail?: boolean }
 
 export type Progress = {
   deviceId: string
