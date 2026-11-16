@@ -52,12 +52,39 @@ const FLOW_PIC: Record<string, string> = {
   고도처리: b1s9,
   '소독·검사': uvB,
   '중화·화학': b1s7,
-  생물학처리: m1,
+  생물학처리: m1, // 미생물 처리와 같은 그림 → 색을 바꿔 구분(FLOW_TINT)
   '정제·검사': roB,
 }
-const FLOW_ICON: Record<string, string> = { 수질검사: 'flask', '오염물질 분석': 'flask' }
+/* 같은 그림이 두 번 나오는 곳은 색을 바꿔 구분 */
+const FLOW_TINT: Record<string, string> = { 생물학처리: 'hue-rotate(75deg) saturate(1.25)' }
+/* 그림이 없는 단계(검사·분석)는 색 있는 시험관 그림 */
+const LAB_BG: Record<string, string> = { 수질검사: 'linear-gradient(150deg,#d7f3fb,#9fdcf0)', '오염물질 분석': 'linear-gradient(150deg,#fde7d2,#f7c29a)' }
 const FLOW_COLOR = ['#2f8fb5', '#9a8a63', '#7b8794'] // 출발 물(자연수·생활하수·공장폐수)
 const RESULT = '#3d8f1c' // 처리 결과 물(수돗물·재이용수) — 출발 물과 다른 초록
+
+/** 검사·분석 단계 컬러 그림 — 시험관 3개(맑은 물 검사는 파랑, 폐수 분석은 갈색→주황) + 돋보기 */
+function LabArt({ kind, bg }: { kind: 'clean' | 'dirty'; bg: string }) {
+  const fills = kind === 'clean' ? ['#3fb6e6', '#5cc8ee', '#8adaf3'] : ['#8a5a2b', '#c2410c', '#f59e0b']
+  return (
+    <span className="grid h-full w-full place-items-center" style={{ background: bg }}>
+      <svg viewBox="0 0 96 64" className="h-[88%] w-[88%]" aria-hidden>
+        <rect x="10" y="44" width="58" height="8" rx="3" fill="#0b4a75" opacity=".85" />
+        {fills.map((f, i) => {
+          const x = 16 + i * 18
+          return (
+            <g key={i}>
+              <rect x={x} y="10" width="12" height="38" rx="6" fill="#fff" stroke="#0b4a75" strokeWidth="2.2" />
+              <rect x={x + 2} y={24 + i * 3} width="8" height={22 - i * 3} rx="4" fill={f} />
+              <rect x={x - 1.5} y="8" width="15" height="4" rx="2" fill="#0b4a75" />
+            </g>
+          )
+        })}
+        <circle cx="78" cy="26" r="11" fill="#fff" fillOpacity=".6" stroke="#0b4a75" strokeWidth="3" />
+        <path d="M86 34 L93 41" stroke="#0b4a75" strokeWidth="4.5" strokeLinecap="round" />
+      </svg>
+    </span>
+  )
+}
 
 const head = 'text-center text-[clamp(17px,4.9vw,20px)] font-bold text-sea'
 const sub = 'mt-1 text-center text-[clamp(13px,3.7vw,15.5px)] font-bold text-cyan'
@@ -325,7 +352,11 @@ export function B2Screen({ onNext }: { onNext: () => void }) {
                             {k + 1}
                           </span>
                           <span className="grid h-[62px] w-[93px] shrink-0 place-items-center overflow-hidden rounded-xl bg-[#eaf4f8] ring-1 ring-[#c3dde8]">
-                            {FLOW_PIC[st] ? <img src={FLOW_PIC[st]} alt="" className="h-full w-full object-cover" /> : <Icon name={FLOW_ICON[st] ?? 'water'} size={30} className="text-sea" />}
+                            {FLOW_PIC[st] ? (
+                              <img src={FLOW_PIC[st]} alt="" className="h-full w-full object-cover" style={{ filter: FLOW_TINT[st] }} />
+                            ) : (
+                              <LabArt kind={st === '오염물질 분석' ? 'dirty' : 'clean'} bg={LAB_BG[st]} />
+                            )}
                           </span>
                           <span className="text-[clamp(16px,4.5vw,18.5px)] font-bold text-ink [word-break:keep-all]">{st}</span>
                         </div>

@@ -29,7 +29,7 @@ export function StampBoard({ got, fresh = -1, showHow = false }: { got: boolean[
             <span className={`text-[clamp(13px,3.6vw,15.5px)] font-bold tracking-wider ${got[i] ? 'text-sea' : 'text-[#8fb3c2]'}`}>{got[i] ? 'CLEAR' : 'STAMP'}</span>
           </motion.div>
           <p className="mt-2 text-[clamp(14.5px,4.1vw,17px)] font-bold text-ink">{s.name}</p>
-          {showHow && <p className="mt-1 text-[clamp(12.5px,3.5vw,14.5px)] leading-snug text-mute">{s.how}</p>}
+          {showHow && <p className="mt-1 text-[clamp(12.5px,3.5vw,14.5px)] leading-snug whitespace-pre-line text-mute">{s.how}</p>}
         </div>
       ))}
     </div>
@@ -41,6 +41,7 @@ export function RiddleScreen({ r, solved, onSolve, onNext }: { r: Riddle; solved
   const [draft, setVal] = useDraft(`q${r.no}`, '')
   const val = solved ? r.answer : draft
   const [wrong, setWrong] = useState(0)
+  const [showHint, setShowHint] = useState(false)
   const [overlay, setOverlay] = useState(false)
   const chars = Array.from(norm(val))
   const n = r.answer.length
@@ -113,6 +114,25 @@ export function RiddleScreen({ r, solved, onSolve, onNext }: { r: Riddle; solved
             </motion.p>
           )}
         </AnimatePresence>
+        {/* 힌트보기 — 누르면 그 자리에 힌트가 펼쳐짐 */}
+        {!solved && (
+          <div className="mt-4 text-center">
+            {!showHint ? (
+              <button onClick={() => setShowHint(true)} className="inline-flex h-11 items-center gap-1.5 rounded-full bg-cyan px-6 text-[clamp(15.5px,4.4vw,18px)] font-bold text-white shadow-[0_4px_0_#0b7f9a]">
+                <Icon name="search" size={18} /> {RIDDLE_UI.hintBtn}
+              </button>
+            ) : (
+              <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border-2 border-cyan bg-[#e8f8fc] px-4 py-3">
+                <p className="text-[clamp(14px,3.97vw,16.5px)] font-bold text-cyan">{RIDDLE_UI.hintHead}</p>
+                {r.reveal.map((l) => (
+                  <p key={l} className="mt-1 text-[clamp(15px,4.25vw,17.5px)] leading-snug font-bold text-ink [word-break:keep-all]">
+                    {l}
+                  </p>
+                ))}
+              </motion.div>
+            )}
+          </div>
+        )}
         {solved && <p className="mt-3 text-center text-[clamp(15px,4.23vw,17.5px)] leading-relaxed text-mute">{r.done}</p>}
 
         <BottomBar>

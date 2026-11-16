@@ -24,9 +24,9 @@ export const INTRO = {
 
 /* ── 02 HOW TO ─────────────────────────────────── */
 export const STAMPS = [
-  { id: 'tour', name: '전시 투어', how: '도슨트와 함께 전시를 둘러보고 암호 3개 풀기' },
-  { id: 'contest', name: '경진대회', how: '본선 작품 관람 후 작품 QR 찍기' },
-  { id: 'hands', name: '체험', how: '정수·아크릴 체험 중 1개 참여 후 체험 테이블 QR 찍기' },
+  { id: 'tour', name: '전시 투어', how: '도슨트와 함께\n전시를 둘러보고\n암호 3개 풀기' },
+  { id: 'contest', name: '경진대회', how: 'Zero Waste\n혁신 아이디어\n작품 관람' },
+  { id: 'hands', name: '체험', how: '에코업 체험 중\n1개 참여' },
 ] as const
 
 export const HOWTO = {
@@ -40,7 +40,7 @@ export const HOWTO = {
     { id: 'keyring', name: '키캡 키링' },
   ],
   giftNote: '외 다양한 경품 · 1인 1회',
-  giftWhen: '11/18~20 운영 · 날짜별 수량 소진 시 마감',
+  giftWhen: '11/18~20 운영',
   cta: '투어 시작',
 }
 
@@ -208,6 +208,7 @@ export type Riddle = {
   emojiAlt: string[]
   how: string // '소리로 읽기' / '소리 + 뜻'
   hint: string
+  reveal: string[] // '힌트보기'를 누르면 보이는 글(줄마다)
   answer: string // 띄어쓰기 무시하고 채점
   cheer: [string, string]
   done: string
@@ -220,6 +221,7 @@ export const RIDDLES: Riddle[] = [
     emojiAlt: ['병', '동그라미', '성'],
     how: '소리로 읽기',
     hint: '병을 일으키는 ○○○ 미생물',
+    reveal: ['병원성 미생물 : 위생 문제나 병을 일으켜요'],
     answer: '병원성',
     cheer: ['정답이에요!', '흙탕물이 조금 맑아졌어요'],
     done: '병 + 원(동그라미) + 성 = 병원성! 병을 일으키는 미생물은 ‘병원성 미생물’이에요.',
@@ -231,6 +233,7 @@ export const RIDDLES: Riddle[] = [
     emojiAlt: ['응(오케이)', '집'],
     how: '소리로 읽기',
     hint: '작은 먼지를 뭉쳐 큰 덩어리로 만드는 처리',
+    reveal: ['응집·침전 : 작은 먼지를 뭉쳐 가라앉혀요.'],
     answer: '응집',
     cheer: ['정답이에요!', '점점 깨끗해지고 있어요'],
     done: '응(오케이) + 집 = 응집! 작은 먼지를 뭉쳐 가라앉히는 처리를 ‘응집’이라고 해요.',
@@ -242,6 +245,7 @@ export const RIDDLES: Riddle[] = [
     emojiAlt: ['자', '연꽃', '물(水)'],
     how: '소리 + 뜻',
     hint: '강·호수·지하수처럼 우리가 처음 얻는 물',
+    reveal: ['자연수를 깨끗하게 정화하면 아래와 같이 다시 쓸 수 있어요.', '수돗물 · 하천유지용수 · 농업용수 · 산업용수'],
     answer: '자연수',
     cheer: ['정답이에요!', '드디어 맑은 물이 됐어요'],
     done: '자 + 연꽃 + 물 수(水) = 자연수! 강·호수·지하수처럼 처음 얻는 물은 ‘자연수’예요.',
@@ -255,6 +259,8 @@ export const RIDDLE_UI = {
   check: '정답 확인',
   wrong: '거의 다 왔어요! 그림을 다시 소리 내어 읽어 보세요.',
   lock: '정답을 맞혀야 다음으로 넘어가요',
+  hintBtn: '힌트보기',
+  hintHead: '힌트',
 }
 
 /* ── 스탬프 획득 · 워터 스테이션 ─────────────────── */
@@ -320,8 +326,8 @@ export const SCAN = {
 
 /* ── 완주 · 등록 · 설문 · 티켓 ─────────────────── */
 export const COMPLETE = {
-  giftHead: '선물뽑기 기회 획득!',
-  giftBody: ['에코업 수처리 전시관 투어를 모두 마쳤어요.', '참가자 등록 후 안내데스크에서 선물을 뽑아요.'],
+  giftHead: '에코업 수처리 전시관\n투어를 모두 마쳤어요!',
+  giftBody: ['참가자 등록 후', '안내데스크에서 선물을 받아요.'],
   cta: '참가자 등록하고 선물 받기',
 }
 

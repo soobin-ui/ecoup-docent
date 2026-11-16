@@ -5,7 +5,7 @@ import type { Progress } from '../lib/progress'
 import { stampLabel } from '../lib/day'
 import { clearDraft, useDraft } from '../lib/draft'
 import { PIN_LOCAL, getTicket, registerTicket, staffUse, stampPinOk, warmUp } from '../lib/api'
-import { BottomBar, Button, Card, Character, Hero, Sheet } from '../components/ui'
+import { BottomBar, Button, Card, Character, Hero, Sheet, LoadingOverlay } from '../components/ui'
 import { Icon } from '../components/Icons'
 import { StampBoard } from '../components/Mission'
 import { Scanner } from '../components/Scanner'
@@ -41,7 +41,7 @@ export function StampGetScreen({ p, which, onNext }: { p: Progress; which: 0 | 1
       {done ? (
         <motion.div {...fade(3)} className="mt-5 rounded-3xl border-2 border-[#f3cf6a] bg-[#fff1bf] p-5 text-center shadow-[0_10px_30px_-14px_rgba(160,110,0,0.45)]">
           <Icon name="gift" size={52} className="mx-auto text-[#d97706]" />
-          <p className="mt-2 text-[clamp(22px,6.2vw,27px)] font-bold text-sea">{COMPLETE.giftHead}</p>
+          <p className="mt-2 text-[clamp(21px,5.9vw,25px)] leading-snug font-bold whitespace-pre-line text-sea">{COMPLETE.giftHead}</p>
           {COMPLETE.giftBody.map((l) => (
             <p key={l} className={`${t15} mt-1 text-[#7a4a00]`}>
               {l}
@@ -223,9 +223,6 @@ export function HandsScreen({ onStamp }: { onStamp: () => void }) {
                 <div className="min-w-0">
                   <p className="text-[clamp(18px,5vw,21px)] font-bold text-ink">{pr.name}</p>
                   <p className={`${t15} mt-0.5 leading-snug text-mute`}>{pr.desc}</p>
-                  <span className="mt-2 inline-block rounded-full px-2.5 py-1 text-[clamp(13px,3.72vw,15.5px)] font-bold" style={{ background: pr.soft, color: pr.color }}>
-                    {pr.gift}
-                  </span>
                 </div>
               </Card>
             </motion.div>
@@ -419,6 +416,7 @@ export function SurveyScreen({ p, update, onDone }: { p: Progress; update: Upd; 
             {busy ? '보내는 중…' : SURVEY.submit}
           </Button>
         </BottomBar>
+        {busy && <LoadingOverlay text="참가자 등록 중이에요" sub="티켓을 만들고 있어요. 잠시만 기다려 주세요" />}
       </Sheet>
     </>
   )
@@ -642,7 +640,7 @@ export function TicketScreen({ p, update, onHome }: { p: Progress; update: Upd; 
                 className="mt-4 h-14 w-full rounded-2xl border-2 border-line text-center text-[24px] tracking-[0.5em] outline-none focus:border-sea"
               />
               {msg && <p className="mt-2 text-[clamp(14.5px,4.1vw,17px)] font-bold text-[#c2410c]">{msg}</p>}
-              {busy && <p className="mt-2 text-center text-[clamp(14px,3.97vw,16px)] font-bold text-cyan">지급 처리 중이에요. 몇 초만 기다려 주세요</p>}
+              {busy && <LoadingOverlay text="지급 처리 중이에요" sub="잠시만 기다려 주세요" />}
               <div className="mt-4 flex gap-2">
                 <button onClick={() => setPinOpen(false)} disabled={busy} className="h-12 flex-1 rounded-2xl bg-[#eef2f3] font-bold text-mute disabled:opacity-50">
                   취소

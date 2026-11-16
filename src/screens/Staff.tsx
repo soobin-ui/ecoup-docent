@@ -3,7 +3,7 @@ import { EVENT, STAFF } from '../content/tour'
 import { dayLabel } from '../lib/day'
 import { SERVER_MODE, staffCheckPin, staffList, staffUse } from '../lib/api'
 import type { ParticipantRow } from '../lib/api'
-import { Button } from '../components/ui'
+import { Button, LoadingOverlay } from '../components/ui'
 
 /** 스태프 화면 (주소 끝 #staff) — 선물 티켓 지급 · 참가자 목록·엑셀 */
 export function StaffScreen() {
@@ -47,6 +47,7 @@ export function StaffScreen() {
         <Button className="mt-4" onClick={login} disabled={pin.length < 4 || busy}>
           {busy ? '확인 중…' : STAFF.enter}
         </Button>
+        {busy && <LoadingOverlay text="스태프 번호 확인 중이에요" sub="잠시만 기다려 주세요" />}
       </main>
     )
 
@@ -107,6 +108,7 @@ function UseTab({ pin }: { pin: string }) {
           {busy ? '확인 중…' : '지급 완료'}
         </button>
       </div>
+      {busy && <LoadingOverlay text="지급 처리 중이에요" sub="잠시만 기다려 주세요" />}
       {res && (
         <p className={`mt-4 text-[18px] font-bold ${text[res.r]?.[1]}`}>
           No. {res.no} · {text[res.r]?.[0] ?? res.r}
