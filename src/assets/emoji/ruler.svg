@@ -1,9 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36">
-  <rect x="1" y="10.5" width="34" height="18" rx="2.6" fill="#C1694F"/>
-  <rect x="1" y="8" width="34" height="18" rx="2.6" fill="#FFCC4D"/>
-  <rect x="1" y="8" width="34" height="2.8" rx="1.4" fill="#FFE8A3"/>
-  <g stroke="#5C3A21" stroke-width="1.35" stroke-linecap="round">
-    <path d="M4.60 10v8.2" /><path d="M6.83 10v4.2" /><path d="M9.07 10v6.0" /><path d="M11.30 10v4.2" /><path d="M13.53 10v8.2" /><path d="M15.77 10v4.2" /><path d="M18.00 10v6.0" /><path d="M20.23 10v4.2" /><path d="M22.47 10v8.2" /><path d="M24.70 10v4.2" /><path d="M26.93 10v6.0" /><path d="M29.17 10v4.2" /><path d="M31.40 10v8.2" />
+  <!-- 자: 가늘고 긴 나무 자 + 위쪽 눈금(짧게) + 숫자 → 빗처럼 안 보이게 살짝 기울임 -->
+  <g transform="rotate(-12 18 18)">
+    <rect x="0.5" y="13.6" width="35" height="11" rx="1.6" fill="#C1694F"/>
+    <rect x="0.5" y="12.2" width="35" height="11" rx="1.6" fill="#FFCC4D" stroke="#5C3A21" stroke-width="0.9"/>
+    <g stroke="#5C3A21" stroke-width="0.8" stroke-linecap="round">
+      <path d="M3.5 12.6v4.2"/><path d="M5.3 12.6v1.8"/><path d="M7.1 12.6v1.8"/><path d="M8.9 12.6v2.8"/><path d="M10.7 12.6v1.8"/><path d="M12.5 12.6v1.8"/>
+      <path d="M14.3 12.6v4.2"/><path d="M16.1 12.6v1.8"/><path d="M17.9 12.6v1.8"/><path d="M19.7 12.6v2.8"/><path d="M21.5 12.6v1.8"/><path d="M23.3 12.6v1.8"/>
+      <path d="M25.1 12.6v4.2"/><path d="M26.9 12.6v1.8"/><path d="M28.7 12.6v1.8"/><path d="M30.5 12.6v2.8"/><path d="M32.3 12.6v1.8"/>
+    </g>
+    <g fill="#5C3A21" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="3.6" text-anchor="middle">
+      <text x="3.5" y="21">0</text><text x="14.3" y="21">1</text><text x="25.1" y="21">2</text>
+    </g>
   </g>
-  <circle cx="30.2" cy="21.4" r="1.9" fill="#E1A100"/>
 </svg>
