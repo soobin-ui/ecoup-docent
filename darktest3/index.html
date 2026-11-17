@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="color-scheme" content="only light" /><meta name="robots" content="noindex, nofollow" /><title>다크 모드 시험 3</title>
+<style>:root{color-scheme:only light}body{margin:0;padding:10px;background:#7fd8f2;font-family:-apple-system,'Malgun Gothic',sans-serif;color:#12324a}
+h1{font-size:19px;margin:2px 0 8px}.info{background:#fff;border-radius:12px;padding:8px 10px;font-size:14px;line-height:1.6}.info b{color:#c2410c}
+.l{margin:12px 0 4px;font-weight:800;font-size:15px}iframe{width:100%;height:190px;border:0;border-radius:14px;display:block}
+.sw{display:flex;gap:6px;margin-top:6px}.sw span{flex:1;height:28px;border-radius:8px;display:grid;place-items:center;font-size:12px}</style></head><body>
+<h1>다크 모드 시험 3</h1><div class="info" id="info">확인 중…</div>
+<div class="sw"><span style="background:#ffffff;color:#000">흰색</span><span style="background:#7fd8f2;color:#000">하늘색</span><span style="background:#000000;color:#fff">검정</span></div>
+<div class="l">A. 지금 방식 (only light)</div><iframe src="a.html"></iframe>
+<div class="l">G. 순서 바꾼 표시 (light only)</div><iframe src="g.html"></iframe>
+<script>
+var ua=navigator.userAgent,sam=/SamsungBrowser\/([\d.]+)/.exec(ua);
+function mq(q){try{return matchMedia(q).matches?'예':'아니요'}catch(e){return '?'}}
+var rows=[['브라우저',sam?'삼성 인터넷 '+sam[1]:ua.slice(0,40)],['다크 신호(dark)',mq('(prefers-color-scheme: dark)')],['라이트 신호(light)',mq('(prefers-color-scheme: light)')],['색 반전(inverted-colors)',mq('(inverted-colors: inverted)')],['고대비(forced-colors)',mq('(forced-colors: active)')],['대비(prefers-contrast: more)',mq('(prefers-contrast: more)')],['비밀 모드 의심',document.cookie===''&&!window.indexedDB?'예':'—']];
+document.getElementById('info').innerHTML=rows.map(function(r){return r[0]+': <b>'+r[1]+'</b>'}).join('<br>');
+</script></body></html>
