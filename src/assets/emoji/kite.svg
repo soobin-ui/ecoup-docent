@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36">
+  <!-- 방패연: 네모난 종이 몸통 + 머리 꼭지(빨강·파랑) + 대살(대나무) + 가운데 방구멍 + 아래 색동, 연줄은 위에서 비스듬히 -->
+  <path d="M7 3.4 L1.2 0.6" stroke="#8A6A4A" stroke-width="0.9" stroke-linecap="round"/>
+  <path d="M28.6 3.4 L1.2 0.6" stroke="#8A6A4A" stroke-width="0.9" stroke-linecap="round"/>
+  <rect x="7.6" y="4.2" width="22" height="29.6" rx="1.2" fill="#BFCBD3"/>
+  <rect x="7" y="3.4" width="22" height="29.6" rx="1.2" fill="#FFFDF6" stroke="#5C3A21" stroke-width="1.1"/>
+  <!-- 머리 꼭지 -->
+  <path d="M12.6 3.4 h5.4 v6.2 a5.4 5.4 0 0 1 -5.4 -5.4 z" fill="#DD2E44"/>
+  <path d="M18 3.4 h5.4 a5.4 5.4 0 0 1 -5.4 5.4 z" fill="#3B88C3"/>
+  <!-- 아래 색동 -->
+  <rect x="7" y="26.6" width="22" height="2.2" fill="#3B88C3"/>
+  <rect x="7" y="28.8" width="22" height="2.2" fill="#FFCC4D"/>
+  <rect x="7" y="31" width="22" height="2" rx="1" fill="#DD2E44"/>
+  <!-- 대살 -->
+  <g stroke="#C08A4A" stroke-width="0.85" stroke-linecap="round">
+    <path d="M18 3.6 V32.8"/>
+    <path d="M7.2 11.2 H28.8"/>
+    <path d="M7.4 3.8 L28.6 32.6"/>
+    <path d="M28.6 3.8 L7.4 32.6"/>
+  </g>
+  <!-- 방구멍 -->
+  <circle cx="18" cy="18.2" r="4.4" fill="#BFE9F7"/>
+  <circle cx="18" cy="18.2" r="4.4" fill="none" stroke="#C08A4A" stroke-width="0.9"/>
+</svg>

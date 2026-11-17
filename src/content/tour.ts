@@ -241,14 +241,14 @@ export const RIDDLES: Riddle[] = [
   {
     no: 3,
     section: 'C · 물의 미래',
-    emojis: ['ruler', '1fab7', '1f4a7'],
-    emojiAlt: ['자', '연꽃', '물(水)'],
+    emojis: ['ruler', 'kite', '1f4a7'],
+    emojiAlt: ['자', '방패연', '물(水)'],
     how: '소리 + 뜻',
     hint: '강·호수·지하수처럼 우리가 처음 얻는 물',
     reveal: ['자연수를 깨끗하게 정화하면 다시 쓸 수 있어요.'],
     answer: '자연수',
     cheer: ['정답이에요!', '드디어 맑은 물이 됐어요'],
-    done: '자 + 연꽃 + 물 수(水) = 자연수! 강·호수·지하수처럼 처음 얻는 물은 ‘자연수’예요.',
+    done: '자 + 연(방패연) + 물 수(水) = 자연수! 강·호수·지하수처럼 처음 얻는 물은 ‘자연수’예요.',
   },
 ]
 export const RIDDLE_UI = {
