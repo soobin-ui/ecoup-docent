@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="color-scheme" content="only light" /><meta name="robots" content="noindex, nofollow" /><title>화면 점검</title>
+<style>:root{color-scheme:only light}body{margin:0;padding:10px;background:#7fd8f2;font-family:-apple-system,'Malgun Gothic',sans-serif;color:#12324a}
+h1{font-size:19px;margin:2px 0 8px}.info{background:#fff;border-radius:12px;padding:8px 10px;font-size:15px;line-height:1.6}.info b{color:#c2410c}
+.l{margin:12px 0 4px;font-weight:800;font-size:15px}iframe{width:100%;border:0;border-radius:14px;display:block}#k{height:150px}#app{height:560px}</style></head><body>
+<h1>화면 점검</h1><div class="info" id="info">확인 중…</div>
+<div class="l">K. 보색+뒤집기 시험</div>
+<iframe id="k" srcdoc='<!doctype html><html><head><meta charset="UTF-8"><meta name="color-scheme" content="only light"><style>:root{color-scheme:only light}html{filter:invert(1);background:#80270d}img{filter:invert(1)}body{margin:0;background:#80270d;font-family:sans-serif;color:#edcdb5}.c{margin:8px;background:#000;border-radius:14px;padding:10px;display:flex;gap:10px;align-items:center;font-size:15px}.b{margin:0 8px;height:40px;border-radius:14px;background:#7023ba;color:#f4c3a1;font-weight:800;display:grid;place-items:center}</style></head><body><div class="c"><img src="../assets/char-3-DY6C3bXt.webp" width="46" height="46">흰 카드 · 남색 글자면 성공</div><div class="b">연두 버튼</div></body></html>'></iframe>
+<div class="l">실제 앱 (새로 불러옴)</div><iframe id="app"></iframe>
+<script>
+var ua=navigator.userAgent,sam=/SamsungBrowser\/([\d.]+)/.exec(ua)
+var f=document.getElementById('app');f.src='../?fresh='+Date.now()
+function info(x){document.getElementById('info').innerHTML='브라우저: <b>'+(sam?'삼성 인터넷 '+sam[1]:ua.slice(0,60))+'</b><br>앱 버전: <b>'+x.v+'</b><br>삼성 보정: <b>'+x.inv+'</b>'}
+info({v:'불러오는 중',inv:'…'})
+f.onload=function(){setTimeout(function(){try{var d=f.contentDocument,s=[].slice.call(d.querySelectorAll('script[src]')).map(function(e){return e.src.split('/').pop()}).join(',');info({v:s||'?',inv:d.documentElement.classList.contains('inv-on')?'켜짐':'꺼짐'})}catch(e){info({v:'읽기 실패',inv:String(e)})}},1500)}
+</script></body></html>
