@@ -613,3 +613,30 @@ button {
     color: var(--color-ink);
   }
 }
+
+/* 삼성 인터넷 강제 다크 대응(src/lib/samsungInvert.ts): 모든 색을 보색으로 바꾼 뒤 화면 전체를 한 번 뒤집음.
+   그림·영상은 색을 안 바꿨으니 한 번 더 뒤집어 원래대로(그림자 drop-shadow 는 그 뒤에 붙임) */
+html.inv-on {
+  filter: invert(1);
+}
+html.inv-on img {
+  filter: invert(1) var(--tw-drop-shadow,);
+}
+html.inv-on video {
+  filter: invert(1);
+}
+/* '진한 배경 + 흰 글자'는 원래 색으로 되돌리고 한 번 더 뒤집음(그 안의 그림은 그대로) */
+html.inv-on [data-inv-un] {
+  filter: invert(1);
+}
+html.inv-on [data-inv-un] img,
+html.inv-on [data-inv-un] video {
+  filter: none;
+}
+/* 색이 서서히 바뀌면 바뀌는 도중 색으로 판단이 꼬임 → 삼성 대응 중엔 CSS 전환을 즉시로(framer-motion 움직임은 그대로) */
+html.inv-on *,
+html.inv-on *::before,
+html.inv-on *::after {
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
+}
