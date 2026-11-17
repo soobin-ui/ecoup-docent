@@ -13,8 +13,9 @@
 
 const KEY = 'ecoup-inv-test'
 
+/* ⚠️ 2026-11-17 실기기(삼성 인터넷 31, 다크)에서 실패: 삼성이 html 의 filter: invert 를 무시해서
+   보색(빨간 배경·남색 카드)이 그대로 보였음 → 삼성 자동 적용 끔. 점검용(localStorage)으로만 남겨 둠. */
 function wanted(): boolean {
-  if (/SamsungBrowser\//.test(navigator.userAgent)) return true
   try {
     return localStorage.getItem(KEY) === '1'
   } catch {
