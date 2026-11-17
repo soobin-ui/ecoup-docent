@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="color-scheme" content="light dark" /><meta name="robots" content="noindex, nofollow" /><title>B 다크 지원 표시</title>
+<script></script>
+<style>
+body{margin:0;background:#7fd8f2;font-family:-apple-system,'Malgun Gothic',sans-serif;color:#12324a}
+.sky{height:60px;background:linear-gradient(180deg,#d4f6ff,#4cc4ea);display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:900;color:#0b4a75}
+.pad{background:#f4fcff;padding:8px}
+.card{background:#fff;border-radius:14px;padding:10px;display:flex;gap:10px;align-items:center}
+.card img{width:46px;height:46px}.card p{margin:0;font-size:15px}
+.btn{margin-top:8px;height:40px;border-radius:14px;background:#8fdc45;color:#0b3c5e;font-weight:800;display:grid;place-items:center;font-size:16px}
+.t{font-size:12px;padding:4px 8px;background:#fff;color:#12324a}
+:root{color-scheme:light dark}@media (prefers-color-scheme:dark){body{background:#7fd8f2;color:#12324a}.pad{background:#f4fcff}.card,.t{background:#fff;color:#12324a}.btn{background:#8fdc45;color:#0b3c5e}.sky{background:linear-gradient(180deg,#d4f6ff,#4cc4ea);color:#0b4a75}}
+</style></head><body>
+<div class="sky">B 다크 지원 표시</div><div class="pad"><div class="card"><img src="char.webp" alt="" /><p>물방울 캐릭터와 함께<br />전시를 둘러봐요.</p></div><div class="btn">다음</div></div>
+<div class="t" id="t"></div>
+<script>var c=getComputedStyle(document.querySelector('.card'));document.getElementById('t').textContent='다크 신호: '+(matchMedia('(prefers-color-scheme: dark)').matches?'켜짐':'꺼짐')+' · 카드 색: '+c.backgroundColor+' · 뒤집기: '+(document.documentElement.classList.contains('flip')?'함':'안 함')</script>
+</body></html>
