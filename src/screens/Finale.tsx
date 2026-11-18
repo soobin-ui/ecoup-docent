@@ -314,6 +314,7 @@ export function RegisterScreen({ p, update, onNext }: { p: Progress; update: Upd
               {l}
             </p>
           ))}
+          <p className="mt-2 text-[clamp(13.5px,3.85vw,16px)] font-bold whitespace-pre-line text-ink">{REGISTER.consent.refuse}</p>
           <button onClick={() => setAgree(!agree)} aria-pressed={agree} className="mt-3 flex items-center gap-2">
             <span className={`grid h-7 w-7 place-items-center rounded-lg border-2 ${agree ? 'border-sea bg-sea text-white' : 'border-[#9cc9da] bg-white'}`}>{agree && <Icon name="check" size={18} />}</span>
             <span className="text-[clamp(16px,4.5vw,18.5px)] font-bold text-ink">{REGISTER.consent.agree}</span>
